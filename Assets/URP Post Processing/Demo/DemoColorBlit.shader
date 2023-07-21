@@ -1,4 +1,4 @@
-﻿Shader "LPostProcessing/DemoColorBlit"
+﻿Shader "URPPostProcessing/DemoColorBlit"
 {
     Properties {}
 

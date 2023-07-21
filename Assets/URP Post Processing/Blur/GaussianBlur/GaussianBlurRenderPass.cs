@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class DualBlurRenderPass : ScriptableRenderPass
+public class GaussianBlurRenderPass : ScriptableRenderPass
 {
     //------------------------------------------------------
     // 变量
@@ -20,12 +20,12 @@ public class DualBlurRenderPass : ScriptableRenderPass
     private RenderTextureDescriptor m_RTDescriptor;
     
     //FrameDebugger标记
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("DualBlur Pass"); 
+    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("GaussianBlur Pass"); 
     
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public DualBlurRenderPass(Material blitMaterial)
+    public GaussianBlurRenderPass(Material blitMaterial)
     {
         m_BlitMaterial = blitMaterial;
     }
@@ -81,7 +81,7 @@ public class DualBlurRenderPass : ScriptableRenderPass
         m_RTDescriptor.height /= m_DownSample;
         
         //获取新的命令缓冲区并为其指定一个名称
-        CommandBuffer cmd = CommandBufferPool.Get("L Post Processing");
+        CommandBuffer cmd = CommandBufferPool.Get("URP PostProcessing");
             
         //ProfilingScope
         using (new ProfilingScope(cmd, m_ProfilingSampler))
@@ -102,49 +102,24 @@ public class DualBlurRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         //创建临时RT0
-        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor);
+        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
         Blitter.BlitCameraTexture(cmd, m_CameraRT, m_TempRT0);
-
-        //DowmSample
         for (int i = 0; i < m_Iterations; i++)
         {
+            //第一轮 RT0 -> RT1
             //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor);
+            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor, FilterMode.Bilinear);
             Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 0);
-            CoreUtils.Swap(ref m_TempRT0, ref m_TempRT1);
+            m_TempRT0?.rt.Release();
+            //第二轮 RT1 -> RT0
+            //创建临时RT0
+            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_TempRT1, m_TempRT0, m_BlitMaterial, 1);
             m_TempRT1?.rt.Release();
-            //Debug.Log(m_RTDescriptor.width+", "+m_RTDescriptor.height);
-            
-            if(i==m_Iterations-1)
-                break;
-            
-            //每次循环降低RT的分辨率
-            m_RTDescriptor.width /= 2;
-            m_RTDescriptor.height /= 2;
-        }
-
-
-        //UpSample
-        for (int i = 0; i < m_Iterations; i++)
-        {
-            //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor);
-            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 1);
-            CoreUtils.Swap(ref m_TempRT0, ref m_TempRT1);
-            m_TempRT1?.rt.Release();
-            
-            //Debug.Log(m_RTDescriptor.width+", "+m_RTDescriptor.height);
-           
-            if(i==m_Iterations-1)
-                break;
-            
-            //每次循环降低RT的分辨率
-            m_RTDescriptor.width *= 2;
-            m_RTDescriptor.height *= 2;
         }
         
         //最后 RT0 -> destination
-        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT);
+        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT, m_BlitMaterial, 1);
         m_TempRT0?.rt.Release();
     }
     

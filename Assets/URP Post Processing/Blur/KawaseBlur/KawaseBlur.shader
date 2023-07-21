@@ -1,4 +1,4 @@
-﻿Shader "LPostProcessing/KawaseBlur"
+﻿Shader "URPPostProcessing/Blur/KawaseBlur"
 {
     Properties {}
 

@@ -15,8 +15,10 @@ MonoBehaviour:
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
-  m_RendererFeatures: []
-  m_RendererFeatureMap: 
+  m_RendererFeatures:
+  - {fileID: 4734020295492205778}
+  - {fileID: 4704079014505886863}
+  m_RendererFeatureMap: d27c4d78609eb2418f34febef03e4841
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -54,3 +56,41 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4704079014505886863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aba577b05edb4d29a0d38077564b6eb9, type: 3}
+  m_Name: GaussianBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 3
+  blurRadius: 3
+  downSample: 3
+  blitShader: {fileID: 4800000, guid: e9a6fe079c9845fe8f7e865ed0068058, type: 3}
+  renderPassEvent: 550
+--- !u!114 &4734020295492205778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0012866961524fdb906457f29e9dc85a, type: 3}
+  m_Name: GaussianBloom
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  iterations: 1
+  blurRadius: 1.74
+  downSample: 2
+  luminanceThreshold: 1
+  bloomIntensity: 10
+  blitShader: {fileID: 4800000, guid: 7d5536a0f20245b0b1ad537149362d20, type: 3}
+  renderPassEvent: 550

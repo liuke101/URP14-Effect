@@ -3,15 +3,17 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class GaussianBlurRenderPass : ScriptableRenderPass
+public class GaussianBloomRenderPass : ScriptableRenderPass
 {
     //------------------------------------------------------
     // 变量
     //------------------------------------------------------
     
-    private int m_Iterations; //模糊迭代次数
-    private float m_BlurRadius;    //模糊范围
-    private int m_DownSample;     //降采样
+    private int m_Iterations;       //模糊迭代次数
+    private float m_BloomRadius;    //模糊范围
+    private int m_DownSample;       //降采样
+    private float m_LuminanceThreshold; //亮度阈值
+    private float m_BloomIntensity; //Bloom强度
     
     private Material m_BlitMaterial;
     private RTHandle m_CameraRT;
@@ -19,13 +21,21 @@ public class GaussianBlurRenderPass : ScriptableRenderPass
     private RTHandle m_TempRT1;
     private RenderTextureDescriptor m_RTDescriptor;
     
-    //FrameDebugger标记
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("GaussianBlur Pass"); 
+    private static readonly int SceneColor = Shader.PropertyToID("_SceneColor");
+    private static readonly int BlurOffset = Shader.PropertyToID("_BlurOffset");
+    private static readonly int LuminanceThreshold = Shader.PropertyToID("_LuminanceThreshold");
+    private static readonly int BloomIntensity = Shader.PropertyToID("_BloomIntensity");
+    private static readonly int BloomTexture = Shader.PropertyToID("_BloomTexture");
     
+    //FrameDebugger标记
+    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("GaussianBloom Pass");
+    
+
+
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public GaussianBlurRenderPass(Material blitMaterial)
+    public GaussianBloomRenderPass(Material blitMaterial)
     {
         m_BlitMaterial = blitMaterial;
     }
@@ -33,12 +43,14 @@ public class GaussianBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample, float luminanceThreshold, float bloomIntensity)
     {
         m_CameraRT = colorHandle;
         m_Iterations = iterations;
-        m_BlurRadius = blurRadius;
+        m_BloomRadius = blurRadius;
         m_DownSample = downSample;
+        m_LuminanceThreshold = luminanceThreshold;
+        m_BloomIntensity = bloomIntensity;
     }
     
     //------------------------------------------------------
@@ -72,16 +84,18 @@ public class GaussianBlurRenderPass : ScriptableRenderPass
     {
         if (m_BlitMaterial == null)
             return;
-        
         //设置模糊半径
-        m_BlitMaterial.SetFloat("_BlurOffset", m_BlurRadius);
-        
+        m_BlitMaterial.SetFloat(BlurOffset, m_BloomRadius);
+        //设置亮度阈值
+        m_BlitMaterial.SetFloat(LuminanceThreshold, m_LuminanceThreshold);
+        //设置Bloom强度
+        m_BlitMaterial.SetFloat(BloomIntensity, m_BloomIntensity);
         //降采样
         m_RTDescriptor.width /= m_DownSample; 
         m_RTDescriptor.height /= m_DownSample;
-        
+
         //获取新的命令缓冲区并为其指定一个名称
-        CommandBuffer cmd = CommandBufferPool.Get("L Post Processing");
+        CommandBuffer cmd = CommandBufferPool.Get("URP Post Processing");
             
         //ProfilingScope
         using (new ProfilingScope(cmd, m_ProfilingSampler))
@@ -101,25 +115,34 @@ public class GaussianBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        //创建临时RT0
-        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor);
-        Blitter.BlitCameraTexture(cmd, m_CameraRT, m_TempRT0);
+        //1.用第一个pass提取较亮的区域
+        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor,FilterMode.Bilinear);
+        
+        
+        Blitter.BlitCameraTexture(cmd,m_CameraRT,m_TempRT0,m_BlitMaterial,0);
+        
+        //保存场景原图
+        m_BlitMaterial.SetTexture(SceneColor, m_CameraRT.rt);
+        
         for (int i = 0; i < m_Iterations; i++)
         {
+            //2.高斯模糊对应第二个和第三个Pass，模糊后的较亮区域存在m_TempRT0
             //第一轮 RT0 -> RT1
             //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor);
-            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 0);
+            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor,FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 1);
             m_TempRT0?.rt.Release();
             //第二轮 RT1 -> RT0
             //创建临时RT0
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor);
-            Blitter.BlitCameraTexture(cmd, m_TempRT1, m_TempRT0, m_BlitMaterial, 1);
+            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor,FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_TempRT1, m_TempRT0, m_BlitMaterial, 2);
             m_TempRT1?.rt.Release();
         }
+        // 3.将完成高斯模糊后的结果传递给材质中的_Bloom纹理属性
+        m_BlitMaterial.SetTexture(BloomTexture, m_TempRT0.rt);
         
-        //最后 RT0 -> destination
-        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT, m_BlitMaterial, 1);
+        // 4.最后调用第四个pass， RT0 -> destination
+        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT, m_BlitMaterial, 3);
         m_TempRT0?.rt.Release();
     }
     

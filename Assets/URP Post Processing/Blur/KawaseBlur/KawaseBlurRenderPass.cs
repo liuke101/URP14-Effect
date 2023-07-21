@@ -3,23 +3,29 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class DemoRenderPass : ScriptableRenderPass
+public class KawaseBlurRenderPass : ScriptableRenderPass
 {
     //------------------------------------------------------
     // 变量
     //------------------------------------------------------
-    private RTHandle m_CameraRT;
-    private Material m_BlitMaterial;
-    private float m_Intensity;
     
-    //CPU和GPU分析采样器的包装器。将此与ProfileScope一起使用可以评测一段代码。
-    //标记Profiling后，可在FrameDebugger中直接查看标记Profiling的对象
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("DemoRenderPass");
+    private int m_Iterations; //模糊迭代次数
+    private float m_BlurRadius;    //模糊范围
+    private int m_DownSample;     //降采样
+    
+    private Material m_BlitMaterial;
+    private RTHandle m_CameraRT;
+    private RTHandle m_TempRT0;
+    private RTHandle m_TempRT1;
+    private RenderTextureDescriptor m_RTDescriptor;
+    
+    //FrameDebugger标记
+    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("KawaseBlur Pass"); 
     
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public DemoRenderPass(Material blitMaterial)
+    public KawaseBlurRenderPass(Material blitMaterial)
     {
         m_BlitMaterial = blitMaterial;
     }
@@ -27,10 +33,12 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, float intensity)
+    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
     {
         m_CameraRT = colorHandle;
-        m_Intensity = intensity;
+        m_Iterations = iterations;
+        m_BlurRadius = blurRadius;
+        m_DownSample = downSample;
     }
     
     //------------------------------------------------------
@@ -41,7 +49,9 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
-       
+        //获取RTDescriptor，描述RT的信息
+        m_RTDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+        m_RTDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
     }
     
     //------------------------------------------------------
@@ -56,15 +66,22 @@ public class DemoRenderPass : ScriptableRenderPass
     }
 
     //------------------------------------------------------
-    // 每帧执行渲染逻辑
+    // 每帧执行，渲染逻辑
     //------------------------------------------------------
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         if (m_BlitMaterial == null)
             return;
         
+        //设置模糊半径
+        m_BlitMaterial.SetFloat("_BlurOffset", m_BlurRadius);
+        
+        //降采样
+        m_RTDescriptor.width /= m_DownSample; 
+        m_RTDescriptor.height /= m_DownSample;
+        
         //获取新的命令缓冲区并为其指定一个名称
-        CommandBuffer cmd = CommandBufferPool.Get("L Post Processing");
+        CommandBuffer cmd = CommandBufferPool.Get("URP Post Processing");
             
         //ProfilingScope
         using (new ProfilingScope(cmd, m_ProfilingSampler))
@@ -84,16 +101,30 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        m_BlitMaterial.SetFloat("_Intensity", m_Intensity);
-        Blit(cmd, m_CameraRT, m_CameraRT, m_BlitMaterial, 0);
-    }
+        //创建临时RT0
+        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
+        Blitter.BlitCameraTexture(cmd, m_CameraRT, m_TempRT0);
+        for (int i = 0; i < m_Iterations; i++)
+        {
+            //创建临时RT1
+            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor, FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 0);
+            CoreUtils.Swap(ref m_TempRT0, ref m_TempRT1);
+            m_TempRT1?.rt.Release();
+        }
 
+        //最后 RT0 -> destination
+        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT);
+        m_TempRT0?.rt.Release();
+    }
+    
     //------------------------------------------------------
     // 相机堆栈中的所有相机都会调用
     // 释放创建的资源
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
+        base.OnCameraCleanup(cmd);
     }
     
     //------------------------------------------------------

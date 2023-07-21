@@ -1,4 +1,4 @@
-﻿Shader "LPostProcessing/DualBlur"
+﻿Shader "URPPostProcessing/Blur/DualBlur"
 {
     Properties {}
 

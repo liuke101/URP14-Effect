@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: aba577b05edb4d29a0d38077564b6eb9
+guid: db9c947cb9e342e789909f0a8d6e9d66
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - blitShader: {instanceID: 0}
+  - blitShader: {fileID: 4800000, guid: a9b6aa775f04455d969a0e5df6156fbb, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
