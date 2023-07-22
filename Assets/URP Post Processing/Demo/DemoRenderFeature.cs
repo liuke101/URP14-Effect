@@ -12,8 +12,8 @@ public class DemoRenderFeature : ScriptableRendererFeature
     [Range (0,1)]
     public float intensity; //颜色强度
     
-    private Material m_BlitMaterial;
-    private DemoRenderPass m_RenderPass = null;
+    private Material m_blitMaterial;
+    private DemoRenderPass m_renderPass = null;
     public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 
     //------------------------------------------------------
@@ -27,10 +27,10 @@ public class DemoRenderFeature : ScriptableRendererFeature
         this.name = "ColorBlit";
         
         //shader创建材质
-        m_BlitMaterial = CoreUtils.CreateEngineMaterial(blitShader);
+        m_blitMaterial = CoreUtils.CreateEngineMaterial(blitShader);
 
         //创建RenderPass
-        m_RenderPass = new DemoRenderPass(m_BlitMaterial);
+        m_renderPass = new DemoRenderPass(m_blitMaterial);
     }
 
     //------------------------------------------------------
@@ -50,13 +50,13 @@ public class DemoRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //设置RenderPass参数
-            m_RenderPass.SetRenderPass(renderer.cameraColorTargetHandle, intensity);
+            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, intensity);
 
             // 配置RenderPass
             // 使用ScriptableRenderPassInpu.Color参数调用ConfigureInput
             // 确保不透明纹理可用于渲染过程
-            m_RenderPass.ConfigureInput(ScriptableRenderPassInput.Color);
-            m_RenderPass.renderPassEvent = renderPassEvent; //插入位置
+            m_renderPass.ConfigureInput(ScriptableRenderPassInput.Color);
+            m_renderPass.renderPassEvent = renderPassEvent; //插入位置
         }
     }
 
@@ -69,7 +69,7 @@ public class DemoRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //入队渲染队列
-            renderer.EnqueuePass(m_RenderPass);
+            renderer.EnqueuePass(m_renderPass);
         }
     }
 
@@ -79,6 +79,6 @@ public class DemoRenderFeature : ScriptableRendererFeature
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        CoreUtils.Destroy(m_BlitMaterial);
+        CoreUtils.Destroy(m_blitMaterial);
     }
 }

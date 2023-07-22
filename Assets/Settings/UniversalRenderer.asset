@@ -1,5 +1,103 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-9165740620020132437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74143052a20f83d45add08593317e6da, type: 3}
+  m_Name: ColorBlit
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  blitShader: {fileID: 4800000, guid: 414ddd899cf5476798c380073879eeb7, type: 3}
+  intensity: 0.092
+  renderPassEvent: 550
+--- !u!114 &-4525692672831763327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b9be5f8315647b287c00bd656ffa6f2, type: 3}
+  m_Name: GodRay
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 6
+  blurRadius: 0.0226
+  downSample: 1
+  radialCenter: {x: 0.5, y: 0.5}
+  radialOffsetIterations: 22
+  luminanceThreshold: 0.17
+  bloomIntensity: 0.71
+  blitShader: {fileID: 4800000, guid: 74be8f5f91f745a09411a571ddb1b93c, type: 3}
+  renderPassEvent: 550
+--- !u!114 &-4330502209399124172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0012866961524fdb906457f29e9dc85a, type: 3}
+  m_Name: GaussianBloom
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  iterations: 3
+  blurRadius: 2.65
+  downSample: 3
+  luminanceThreshold: 4
+  bloomIntensity: 1
+  blitShader: {fileID: 4800000, guid: 7d5536a0f20245b0b1ad537149362d20, type: 3}
+  renderPassEvent: 550
+--- !u!114 &-3346177694461063038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36f14718d4cd4994a402c46cd2294845, type: 3}
+  m_Name: RadialBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 5
+  blurRadius: 0.0014
+  downSample: 1
+  radialCenter: {x: 0.5, y: 0.5}
+  radialOffsetIterations: 50
+  blitShader: {fileID: 4800000, guid: ff17c157b346432395847a7b73162793, type: 3}
+  renderPassEvent: 550
+--- !u!114 &-2643730984237125811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0012866961524fdb906457f29e9dc85a, type: 3}
+  m_Name: GaussianBloom
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  iterations: 1
+  blurRadius: 0
+  downSample: 2
+  luminanceThreshold: 0.6
+  bloomIntensity: 1
+  blitShader: {fileID: 4800000, guid: 7d5536a0f20245b0b1ad537149362d20, type: 3}
+  renderPassEvent: 550
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16,16 +114,18 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 4734020295492205778}
-  - {fileID: 4704079014505886863}
-  m_RendererFeatureMap: d27c4d78609eb2418f34febef03e4841
+  - {fileID: 1895852540386831313}
+  - {fileID: -4330502209399124172}
+  - {fileID: -3346177694461063038}
+  - {fileID: -4525692672831763327}
+  m_RendererFeatureMap: d16b4740d76b4f1a348fb83d2ff7e6c38210509e1dfd8fd1814c46017e8231c1
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
     blitPS: {fileID: 4800000, guid: c17132b1f77d20942aa75f8429c0f8bc, type: 3}
     copyDepthPS: {fileID: 4800000, guid: d6dae50ee9e1bfa4db75f19f99355220, type: 3}
-    screenSpaceShadowPS: {fileID: 4800000, guid: 0f854b35a0cf61a429bd5dcfea30eddd, type: 3}
+    screenSpaceShadowPS: {fileID: 0}
     samplingPS: {fileID: 4800000, guid: 04c410c9937594faa893a11dceb85f7e, type: 3}
     stencilDeferredPS: {fileID: 4800000, guid: e9155b26e1bc55942a41e518703fe304, type: 3}
     fallbackErrorPS: {fileID: 4800000, guid: e6e9a19c3678ded42a3bc431ebef7dbd, type: 3}
@@ -53,9 +153,27 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
-  m_CopyDepthMode: 0
+  m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &1895852540386831313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db9c947cb9e342e789909f0a8d6e9d66, type: 3}
+  m_Name: BoxBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 1
+  blurRadius: 0
+  downSample: 2
+  blitShader: {fileID: 4800000, guid: a9b6aa775f04455d969a0e5df6156fbb, type: 3}
+  renderPassEvent: 550
 --- !u!114 &4704079014505886863
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,8 +188,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   iterations: 3
-  blurRadius: 3
-  downSample: 3
+  blurRadius: 2.35
+  downSample: 1
   blitShader: {fileID: 4800000, guid: e9a6fe079c9845fe8f7e865ed0068058, type: 3}
   renderPassEvent: 550
 --- !u!114 &4734020295492205778
@@ -86,11 +204,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0012866961524fdb906457f29e9dc85a, type: 3}
   m_Name: GaussianBloom
   m_EditorClassIdentifier: 
-  m_Active: 1
-  iterations: 1
-  blurRadius: 1.74
-  downSample: 2
-  luminanceThreshold: 1
+  m_Active: 0
+  iterations: 5
+  blurRadius: 1.86
+  downSample: 1
+  luminanceThreshold: 0.7
   bloomIntensity: 10
   blitShader: {fileID: 4800000, guid: 7d5536a0f20245b0b1ad537149362d20, type: 3}
+  renderPassEvent: 550
+--- !u!114 &6333891254019073448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e877129772e45379358c29ea6e3bd38, type: 3}
+  m_Name: KawaseBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 7
+  blurRadius: 3.97
+  downSample: 1
+  blitShader: {fileID: 4800000, guid: 35040253c6c540269e3a2de67fe148db, type: 3}
+  renderPassEvent: 550
+--- !u!114 &8394554880493397213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68444339930d4a32bd4912fbbda526fe, type: 3}
+  m_Name: DualBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 1
+  blurRadius: 2.82
+  downSample: 2
+  blitShader: {fileID: 4800000, guid: 4db70ba5f463467a9a3de2ac907a5906, type: 3}
   renderPassEvent: 550

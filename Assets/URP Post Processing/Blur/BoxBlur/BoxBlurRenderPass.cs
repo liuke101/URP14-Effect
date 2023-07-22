@@ -9,25 +9,27 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     // 变量
     //------------------------------------------------------
     
-    private int m_Iterations; //模糊迭代次数
-    private float m_BlurRadius;    //模糊范围
-    private int m_DownSample;     //降采样
+    private int m_iterations; //模糊迭代次数
+    private float m_blurRadius;    //模糊范围
+    private int m_downSample;     //降采样
     
-    private Material m_BlitMaterial;
-    private RTHandle m_CameraRT;
-    private RTHandle m_TempRT0;
-    private RTHandle m_TempRT1;
-    private RenderTextureDescriptor m_RTDescriptor;
+    private Material m_blitMaterial;
+    private RTHandle m_cameraRT;
+    private RTHandle m_tempRT0;
+    private RTHandle m_tempRT1;
+    private RenderTextureDescriptor m_rtDescriptor;
     
     //FrameDebugger标记
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("BoxBlur Pass"); 
+    ProfilingSampler m_profilingSampler = new ProfilingSampler("BoxBlur Pass");
     
+    private static readonly int s_BlurOffset = Shader.PropertyToID("_BlurOffset");
+
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
     public BoxBlurRenderPass(Material blitMaterial)
     {
-        m_BlitMaterial = blitMaterial;
+        m_blitMaterial = blitMaterial;
     }
     
     //------------------------------------------------------
@@ -35,10 +37,10 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
     {
-        m_CameraRT = colorHandle;
-        m_Iterations = iterations;
-        m_BlurRadius = blurRadius;
-        m_DownSample = downSample;
+        m_cameraRT = colorHandle;
+        m_iterations = iterations;
+        m_blurRadius = blurRadius;
+        m_downSample = downSample;
     }
     
     //------------------------------------------------------
@@ -50,8 +52,8 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         //获取RTDescriptor，描述RT的信息
-        m_RTDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-        m_RTDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
+        m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+        m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
     }
     
     //------------------------------------------------------
@@ -60,7 +62,7 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
     {
         //相机RT
-        ConfigureTarget(m_CameraRT);
+        ConfigureTarget(m_cameraRT);
         //清除颜色
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
@@ -70,21 +72,21 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        if (m_BlitMaterial == null)
+        if (m_blitMaterial == null)
             return;
         
         //设置模糊半径
-        m_BlitMaterial.SetFloat("_BlurOffset", m_BlurRadius);
+        m_blitMaterial.SetFloat(s_BlurOffset, m_blurRadius);
         
         //降采样
-        m_RTDescriptor.width /= m_DownSample; 
-        m_RTDescriptor.height /= m_DownSample;
+        m_rtDescriptor.width /= m_downSample; 
+        m_rtDescriptor.height /= m_downSample;
         
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get("URP Post Processing");
             
         //ProfilingScope
-        using (new ProfilingScope(cmd, m_ProfilingSampler))
+        using (new ProfilingScope(cmd, m_profilingSampler))
         {
             Render(cmd);
         }
@@ -102,25 +104,25 @@ public class BoxBlurRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         //创建临时RT0
-        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
-        Blitter.BlitCameraTexture(cmd, m_CameraRT, m_TempRT0);
-        for (int i = 0; i < m_Iterations; i++)
+        RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
+        for (int i = 0; i < m_iterations; i++)
         {
             //第一轮 RT0 -> RT1
             //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 0);
-            m_TempRT0?.rt.Release();
+            RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
+            m_tempRT0?.rt.Release();
             //第二轮 RT1 -> RT0
             //创建临时RT0
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_TempRT1, m_TempRT0, m_BlitMaterial, 1);
-            m_TempRT1?.rt.Release();
+            RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
+            m_tempRT1?.rt.Release();
         }
         
         //最后 RT0 -> destination
-        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT, m_BlitMaterial, 1);
-        m_TempRT0?.rt.Release();
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
+        m_tempRT0?.rt.Release();
     }
     
     //------------------------------------------------------

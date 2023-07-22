@@ -10,14 +10,17 @@ public class RadialBlurRenderFeature : ScriptableRendererFeature
     //------------------------------------------------------‘
     [Range (0,10)]
     public int iterations = 1;         //模糊迭代次数
-    [Range (0.0f,5.0f)]
+    [Range (0.0f,0.1f)]
     public float blurRadius = 0.0f;    //模糊范围
     [Range (1,8)]
     public int downSample = 2;         //降采样
+
+    public Vector2 radialCenter = new Vector2(0.5f,0.5f);
+    [Range(0, 50)] public int radialOffsetIterations = 10;
     
     public Shader blitShader;
-    private Material m_BlitMaterial;
-    private RadialBlurRenderPass m_RenderPass;
+    private Material m_blitMaterial;
+    private RadialBlurRenderPass m_renderPass;
     public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 
     //------------------------------------------------------
@@ -31,10 +34,10 @@ public class RadialBlurRenderFeature : ScriptableRendererFeature
         this.name = "RadialBlur";
         
         //shader创建材质
-        m_BlitMaterial = CoreUtils.CreateEngineMaterial(blitShader);
+        m_blitMaterial = CoreUtils.CreateEngineMaterial(blitShader);
 
         //创建RenderPass
-        m_RenderPass = new RadialBlurRenderPass(m_BlitMaterial);
+        m_renderPass = new RadialBlurRenderPass(m_blitMaterial);
     }
 
     //------------------------------------------------------
@@ -54,13 +57,13 @@ public class RadialBlurRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //设置RenderPass参数
-            m_RenderPass.SetRenderPass(renderer.cameraColorTargetHandle, iterations, blurRadius, downSample);
+            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, iterations, blurRadius, downSample,radialCenter,radialOffsetIterations);
 
             // 配置RenderPass
             // 使用ScriptableRenderPassInpu.Color参数调用ConfigureInput
             // 确保不透明纹理可用于渲染过程
-            m_RenderPass.ConfigureInput(ScriptableRenderPassInput.Color);
-            m_RenderPass.renderPassEvent = renderPassEvent; //插入位置
+            m_renderPass.ConfigureInput(ScriptableRenderPassInput.Color);
+            m_renderPass.renderPassEvent = renderPassEvent; //插入位置
         }
     }
 
@@ -73,7 +76,7 @@ public class RadialBlurRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //入队渲染队列
-            renderer.EnqueuePass(m_RenderPass);
+            renderer.EnqueuePass(m_renderPass);
         }
     }
 
@@ -83,6 +86,6 @@ public class RadialBlurRenderFeature : ScriptableRendererFeature
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        CoreUtils.Destroy(m_BlitMaterial);
+        CoreUtils.Destroy(m_blitMaterial);
     }
 }

@@ -197,7 +197,6 @@
 
             float4 frag(Varyings i) : SV_Target
             {
-                float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[0]);
                 float4 scenecolor = SAMPLE_TEXTURE2D(_SceneColor, sampler_SceneColor, i.uv[0]);
                 float4 bloom = SAMPLE_TEXTURE2D(_BloomTexture, sampler_BloomTexture, i.uv[0]);
 

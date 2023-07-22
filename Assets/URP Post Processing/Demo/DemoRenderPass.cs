@@ -8,20 +8,22 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // 变量
     //------------------------------------------------------
-    private RTHandle m_CameraRT;
-    private Material m_BlitMaterial;
-    private float m_Intensity;
+    private RTHandle m_cameraRT;
+    private Material m_blitMaterial;
+    private float m_intensity;
     
     //CPU和GPU分析采样器的包装器。将此与ProfileScope一起使用可以评测一段代码。
     //标记Profiling后，可在FrameDebugger中直接查看标记Profiling的对象
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("DemoRenderPass");
+    private ProfilingSampler m_profilingSampler = new ProfilingSampler("DemoRenderPass");
     
+    private static readonly int s_Intensity = Shader.PropertyToID("_Intensity");
+
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
     public DemoRenderPass(Material blitMaterial)
     {
-        m_BlitMaterial = blitMaterial;
+        m_blitMaterial = blitMaterial;
     }
     
     //------------------------------------------------------
@@ -29,8 +31,8 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public void SetRenderPass(RTHandle colorHandle, float intensity)
     {
-        m_CameraRT = colorHandle;
-        m_Intensity = intensity;
+        m_cameraRT = colorHandle;
+        m_intensity = intensity;
     }
     
     //------------------------------------------------------
@@ -50,7 +52,7 @@ public class DemoRenderPass : ScriptableRenderPass
     public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
     {
         //相机RT
-        ConfigureTarget(m_CameraRT);
+        ConfigureTarget(m_cameraRT);
         //清除颜色
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
@@ -60,14 +62,14 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        if (m_BlitMaterial == null)
+        if (m_blitMaterial == null)
             return;
         
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get("URP Post Processing");
             
         //ProfilingScope
-        using (new ProfilingScope(cmd, m_ProfilingSampler))
+        using (new ProfilingScope(cmd, m_profilingSampler))
         {
             Render(cmd);
         }
@@ -84,8 +86,8 @@ public class DemoRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        m_BlitMaterial.SetFloat("_Intensity", m_Intensity);
-        Blit(cmd, m_CameraRT, m_CameraRT, m_BlitMaterial, 0);
+        m_blitMaterial.SetFloat(s_Intensity, m_intensity);
+        Blit(cmd, m_cameraRT, m_cameraRT, m_blitMaterial, 0);
     }
 
     //------------------------------------------------------

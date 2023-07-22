@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -8,39 +9,48 @@ public class RadialBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // 变量
     //------------------------------------------------------
+
+    private int m_iterations; //模糊迭代次数
+    private float m_blurRadius; //模糊范围
+    private int m_downSample; //降采样
+    private Vector2 m_radialCenter; //径向轴心
+    private int m_radialOffsetIterations; //径向偏移迭代次数
     
-    private int m_Iterations; //模糊迭代次数
-    private float m_BlurRadius;    //模糊范围
-    private int m_DownSample;     //降采样
-    
-    private Material m_BlitMaterial;
-    private RTHandle m_CameraRT;
-    private RTHandle m_TempRT0;
-    private RTHandle m_TempRT1;
-    private RenderTextureDescriptor m_RTDescriptor;
-    
+
+    private Material m_blitMaterial;
+    private RTHandle m_cameraRT;
+    private RTHandle m_tempRT0;
+    private RTHandle m_tempRT1;
+    private RenderTextureDescriptor m_rtDescriptor;
+
     //FrameDebugger标记
-    ProfilingSampler m_ProfilingSampler = new ProfilingSampler("RadialBlur Pass"); 
+    ProfilingSampler m_profilingSampler = new ProfilingSampler("RadialBlur Pass");
+    
+    private static readonly int s_BlurOffset = Shader.PropertyToID("_BlurOffset");
+    private static readonly int s_RadialCenter = Shader.PropertyToID("_RadialCenter");
+    private static readonly int s_RadialOffsetIterations = Shader.PropertyToID("_RadialOffsetIterations");
     
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
     public RadialBlurRenderPass(Material blitMaterial)
     {
-        m_BlitMaterial = blitMaterial;
+        m_blitMaterial = blitMaterial;
     }
-    
+
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample, Vector2 radialCenter,int radialOffsetIterations)
     {
-        m_CameraRT = colorHandle;
-        m_Iterations = iterations;
-        m_BlurRadius = blurRadius;
-        m_DownSample = downSample;
+        m_cameraRT = colorHandle;
+        m_iterations = iterations;
+        m_blurRadius = blurRadius;
+        m_downSample = downSample;
+        m_radialCenter = radialCenter;
+        m_radialOffsetIterations = radialOffsetIterations;
     }
-    
+
     //------------------------------------------------------
     // 在渲染相机之前调用
     // 1.配置 Render Target 和它们的 Clear State
@@ -50,17 +60,17 @@ public class RadialBlurRenderPass : ScriptableRenderPass
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         //获取RTDescriptor，描述RT的信息
-        m_RTDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-        m_RTDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
+        m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+        m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
     }
-    
+
     //------------------------------------------------------
     // 在执行RenderPass之前调用，功能同OnCameraSetup
     //------------------------------------------------------
     public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
     {
         //相机RT
-        ConfigureTarget(m_CameraRT);
+        ConfigureTarget(m_cameraRT);
         //清除颜色
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
@@ -70,25 +80,29 @@ public class RadialBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        if (m_BlitMaterial == null)
+        if (m_blitMaterial == null)
             return;
-        
+
         //设置模糊半径
-        m_BlitMaterial.SetFloat("_BlurOffset", m_BlurRadius);
-        
+        m_blitMaterial.SetFloat(s_BlurOffset, m_blurRadius);
+        //设置径向轴心
+        m_blitMaterial.SetVector(s_RadialCenter, m_radialCenter);
+        //设置径向偏移迭代次数
+        m_blitMaterial.SetInt(s_RadialOffsetIterations, m_radialOffsetIterations);
+
         //降采样
-        m_RTDescriptor.width /= m_DownSample; 
-        m_RTDescriptor.height /= m_DownSample;
-        
+        m_rtDescriptor.width /= m_downSample;
+        m_rtDescriptor.height /= m_downSample;
+
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get("URP Post Processing");
-            
+
         //ProfilingScope
-        using (new ProfilingScope(cmd, m_ProfilingSampler))
+        using (new ProfilingScope(cmd, m_profilingSampler))
         {
             Render(cmd);
         }
-        
+
         //执行命令缓冲区中的命令
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
@@ -102,27 +116,22 @@ public class RadialBlurRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         //创建临时RT0
-        RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
-        Blitter.BlitCameraTexture(cmd, m_CameraRT, m_TempRT0);
-        for (int i = 0; i < m_Iterations; i++)
+        RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
+        for (int i = 0; i < m_iterations; i++)
         {
-            //第一轮 RT0 -> RT1
             //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT1, m_RTDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_TempRT0, m_TempRT1, m_BlitMaterial, 0);
-            m_TempRT0?.rt.Release();
-            //第二轮 RT1 -> RT0
-            //创建临时RT0
-            RenderingUtils.ReAllocateIfNeeded(ref m_TempRT0, m_RTDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_TempRT1, m_TempRT0, m_BlitMaterial, 1);
-            m_TempRT1?.rt.Release();
+            RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
+            Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
+            CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
+            m_tempRT1?.rt.Release();
         }
-        
+
         //最后 RT0 -> destination
-        Blitter.BlitCameraTexture(cmd, m_TempRT0, m_CameraRT, m_BlitMaterial, 1);
-        m_TempRT0?.rt.Release();
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
+        m_tempRT0?.rt.Release();
     }
-    
+
     //------------------------------------------------------
     // 相机堆栈中的所有相机都会调用
     // 释放创建的资源
@@ -131,7 +140,7 @@ public class RadialBlurRenderPass : ScriptableRenderPass
     {
         base.OnCameraCleanup(cmd);
     }
-    
+
     //------------------------------------------------------
     // 渲染完相机堆栈中的最后一个相机后调用一次
     // 释放创建的资源
