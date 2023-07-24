@@ -16,7 +16,7 @@ MonoBehaviour:
   blitShader: {fileID: 4800000, guid: 414ddd899cf5476798c380073879eeb7, type: 3}
   intensity: 0.092
   renderPassEvent: 550
---- !u!114 &-4525692672831763327
+--- !u!114 &-6495180107888140894
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -25,20 +25,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b9be5f8315647b287c00bd656ffa6f2, type: 3}
-  m_Name: GodRay
+  m_Script: {fileID: 11500000, guid: 1e9d3b1f540554345a68d6c1f870c9a8, type: 3}
+  m_Name: OutlinePassFeature
   m_EditorClassIdentifier: 
   m_Active: 0
-  iterations: 6
-  blurRadius: 0.0226
-  downSample: 1
-  radialCenter: {x: 0.5, y: 0.5}
-  radialOffsetIterations: 22
-  luminanceThreshold: 0.17
-  bloomIntensity: 0.71
-  blitShader: {fileID: 4800000, guid: 74be8f5f91f745a09411a571ddb1b93c, type: 3}
-  renderPassEvent: 550
---- !u!114 &-4330502209399124172
+  Event: 300
+  filterSettings:
+    RenderQueueType: 0
+    LayerMask:
+      serializedVersion: 2
+      m_Bits: 0
+    PassNames: []
+  material: {fileID: 0}
+  passes: 
+  overrideDepthState: 0
+  depthCompareFunction: 4
+  enableWrite: 1
+--- !u!114 &-3803043711603353031
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47,37 +50,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0012866961524fdb906457f29e9dc85a, type: 3}
-  m_Name: GaussianBloom
+  m_Script: {fileID: 11500000, guid: b97cf1388a0c4d1a98de29cc40f9eeb8, type: 3}
+  m_Name: CustomRF
   m_EditorClassIdentifier: 
   m_Active: 1
-  iterations: 3
-  blurRadius: 2.65
-  downSample: 3
-  luminanceThreshold: 4
-  bloomIntensity: 1
-  blitShader: {fileID: 4800000, guid: 7d5536a0f20245b0b1ad537149362d20, type: 3}
-  renderPassEvent: 550
---- !u!114 &-3346177694461063038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36f14718d4cd4994a402c46cd2294845, type: 3}
-  m_Name: RadialBlur
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  iterations: 5
-  blurRadius: 0.0014
+  iterations: 0
+  blurRadius: 0
   downSample: 1
-  radialCenter: {x: 0.5, y: 0.5}
-  radialOffsetIterations: 50
-  blitShader: {fileID: 4800000, guid: ff17c157b346432395847a7b73162793, type: 3}
-  renderPassEvent: 550
+  blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
+  settings:
+    passTag: CustomRenderFeature
+    renderPassEvent: 500
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      LightModeTags: []
+      passNames: []
+    overrideDepthState: 1
+    enableWrite: 1
+    depthCompareFunction: 4
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
 --- !u!114 &-2643730984237125811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,11 +114,10 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 1895852540386831313}
-  - {fileID: -4330502209399124172}
-  - {fileID: -3346177694461063038}
-  - {fileID: -4525692672831763327}
-  m_RendererFeatureMap: d16b4740d76b4f1a348fb83d2ff7e6c38210509e1dfd8fd1814c46017e8231c1
+  - {fileID: 7211133373611641427}
+  - {fileID: -6495180107888140894}
+  - {fileID: -3803043711603353031}
+  m_RendererFeatureMap: 530a16da98171364a2dd24d51a7cdca5395a99c8e4df38cb
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -156,24 +155,6 @@ MonoBehaviour:
   m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
---- !u!114 &1895852540386831313
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db9c947cb9e342e789909f0a8d6e9d66, type: 3}
-  m_Name: BoxBlur
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  iterations: 1
-  blurRadius: 0
-  downSample: 2
-  blitShader: {fileID: 4800000, guid: a9b6aa775f04455d969a0e5df6156fbb, type: 3}
-  renderPassEvent: 550
 --- !u!114 &4704079014505886863
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,6 +211,48 @@ MonoBehaviour:
   downSample: 1
   blitShader: {fileID: 4800000, guid: 35040253c6c540269e3a2de67fe148db, type: 3}
   renderPassEvent: 550
+--- !u!114 &7211133373611641427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: RenderObjects
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    passTag: RenderObjects
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 0}
+    overrideShaderPassIndex: 0
+    overrideMode: 1
+    overrideDepthState: 0
+    depthCompareFunction: 4
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &8394554880493397213
 MonoBehaviour:
   m_ObjectHideFlags: 0
