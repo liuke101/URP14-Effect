@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 
-public class CustomRenderFeature : ScriptableRendererFeature
+public class GrainyBlurRenderFeature : ScriptableRendererFeature
 {
     /// <summary>
     /// 渲染参数
@@ -16,15 +16,9 @@ public class CustomRenderFeature : ScriptableRendererFeature
         [Range(0, 10)] public int iterations = 1; //模糊迭代次数
         [Range(0.0f, 5.0f)] public float blurRadius = 0.0f; //模糊范围
         [Range(1, 8)] public int downSample = 2; //降采样
+        [Range(0, 10)] public int uvDistortionIterations = 1; //uv扭曲迭代次数
     }
-    
-    private CustomRenderPass m_renderPass; //RenderPass
-    public RenderParameters parameters = new RenderParameters();
-    public Shader blitShader; //手动在RF的Inspector界面设置shader
-    private Material m_blitMaterial;
-    public RenderSettings settings = new RenderSettings();
-    
-    //------------------------------------------
+
     /// <summary>
     /// 渲染设置
     /// </summary>
@@ -35,7 +29,7 @@ public class CustomRenderFeature : ScriptableRendererFeature
         public string commandBufferTag = "URP Post Processing";
 
         //profiler标签名
-        public string profilerTag = "CustomPass";
+        public string profilerTag = "Grainy Blur Pass";
 
         //插入位置
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
@@ -64,6 +58,14 @@ public class CustomRenderFeature : ScriptableRendererFeature
     }
 
     //------------------------------------------------------
+
+    public RenderParameters parameters = new RenderParameters();
+    public Shader blitShader; //手动在RF的Inspector界面设置shader
+    private Material m_blitMaterial;
+    private GrainyBlurRenderPass m_renderPass;
+    public RenderSettings settings = new RenderSettings();
+
+    //------------------------------------------------------
     //Unity 对以下事件调用此方法：
     //首次加载 RF 时：OnEnable()
     //在 RF 的 Inspector 中更改属性时:OnValidate()
@@ -80,7 +82,7 @@ public class CustomRenderFeature : ScriptableRendererFeature
         m_blitMaterial = CoreUtils.CreateEngineMaterial(blitShader);
 
         //创建RenderPass
-        m_renderPass = new CustomRenderPass(settings.commandBufferTag, settings.profilerTag, settings.renderPassEvent,
+        m_renderPass = new GrainyBlurRenderPass(settings.commandBufferTag, settings.profilerTag, settings.renderPassEvent,
             filter.LightModeTags, filter.renderQueueType, filter.layerMask, m_blitMaterial);
 
     }
@@ -102,7 +104,7 @@ public class CustomRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //设置RenderPass参数
-            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.iterations, parameters.blurRadius, parameters.downSample);
+            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.iterations, parameters.blurRadius, parameters.downSample, parameters.uvDistortionIterations);
 
             // 配置RenderPass
             // 使用ScriptableRenderPassInpu.Color参数调用ConfigureInput

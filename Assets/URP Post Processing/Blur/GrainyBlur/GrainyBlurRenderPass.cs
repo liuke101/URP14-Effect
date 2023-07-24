@@ -5,7 +5,7 @@ using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class CustomRenderPass : ScriptableRenderPass
+public class GrainyBlurRenderPass : ScriptableRenderPass
 {
     #region 渲染设置
     private RenderQueueType m_renderQueueType;
@@ -24,6 +24,7 @@ public class CustomRenderPass : ScriptableRenderPass
     private int m_iterations; //模糊迭代次数
     private float m_blurRadius;    //模糊范围
     private int m_downSample;     //降采样
+    private int m_uvDistortionIterations; //UV扰动叠加
     
     private Material m_blitMaterial;
     private RTHandle m_cameraRT;
@@ -34,7 +35,7 @@ public class CustomRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public CustomRenderPass(string commandBufferTag, string profilerTag,RenderPassEvent renderPassEvent,string[] shaderTags,RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
+    public GrainyBlurRenderPass(string commandBufferTag, string profilerTag,RenderPassEvent renderPassEvent,string[] shaderTags,RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
     {
         #region 渲染设置相关参数
         base.profilingSampler = new ProfilingSampler(nameof(CustomRenderPass));
@@ -66,12 +67,13 @@ public class CustomRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample,int uvDistortionIterations)
     {
         m_cameraRT = colorHandle;
         m_iterations = iterations;
         m_blurRadius = blurRadius;
         m_downSample = downSample;
+        m_uvDistortionIterations = uvDistortionIterations;
     }
     
     //------------------------------------------------------
@@ -117,6 +119,7 @@ public class CustomRenderPass : ScriptableRenderPass
         
         //设置模糊半径
         m_blitMaterial.SetFloat("_BlurOffset", m_blurRadius);
+        m_blitMaterial.SetInt("_UVDistortionIterations", m_uvDistortionIterations);
         
         //降采样
         m_rtDescriptor.width /= m_downSample; 
@@ -147,7 +150,6 @@ public class CustomRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        // 单Pass
         //创建临时RT0
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
         Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
@@ -159,33 +161,10 @@ public class CustomRenderPass : ScriptableRenderPass
             CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
             m_tempRT1?.rt.Release();
         }
-        
+
         //最后 RT0 -> destination
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
         m_tempRT0?.rt.Release();
-        
-        // //双Pass，乒乓Blit
-        // //创建临时RT0
-        // RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        // Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        // for (int i = 0; i < m_iterations; i++)
-        // {
-        //     //第一轮 RT0 -> RT1
-        //     //创建临时RT1
-        //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
-        //     Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //     m_tempRT0?.rt.Release();
-        //     //第二轮 RT1 -> RT0
-        //     //创建临时RT0
-        //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        //     Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
-        //     m_tempRT1?.rt.Release();
-        // }
-        //
-        // //最后 RT0 -> destination
-        // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
-        // m_tempRT0?.rt.Release();
-        
     }
     
     //------------------------------------------------------

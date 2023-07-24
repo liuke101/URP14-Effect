@@ -72,3 +72,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# scene
+/[Aa]ssets/[Pp]olytope [Ss]tudio/
+/[Aa]ssets/[Cc]yber[Cc]ity/
