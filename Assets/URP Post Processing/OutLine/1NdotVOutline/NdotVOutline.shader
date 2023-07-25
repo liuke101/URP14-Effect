@@ -1,16 +1,11 @@
-Shader "Custom/GetInputs"
+Shader "Custom/Outline/NdotVOutline"
 {
     Properties
     {
         _MainTex ("MainTex", 2D) = "white" {}
-        _BaseColor("BaseColor", Color) = (1,1,1,1)
         [Normal] _NormalMap("NormalMap", 2D) = "bump" {}
         _NormalScale("NormalScale", Range(0, 10)) = 1
-
-        [Header(Specular)]
-        _SpecularExp("SpecularExp", Range(1, 100)) = 32
-        _SpecularStrength("SpecularStrength", Range(0, 10)) = 1
-        _SpecularColor("SpecularColor", Color) = (1,1,1,1)
+        _Edge("Edge", Range(0, 1)) = 0.5
     }
     
     HLSLINCLUDE
@@ -20,11 +15,8 @@ Shader "Custom/GetInputs"
 
     CBUFFER_START(UnityPerMaterial)
     float4 _MainTex_ST;
-    float4 _BaseColor;
     float _NormalScale;
-    float _SpecularExp;
-    float _SpecularStrength;
-    float4 _SpecularColor;
+    float _Edge;
     CBUFFER_END
 
     TEXTURE2D(_MainTex);
@@ -104,18 +96,13 @@ Shader "Custom/GetInputs"
 
                 //向量计算
                 float3x3 TBN = float3x3(i.tangentWS.xyz, i.bitangentWS.xyz, i.normalWS.xyz);
-                float3 N = TransformTangentToWorld(normalMap, TBN, true);
-                float3 L = normalize(_MainLightPosition.xyz);
-                float3 V = normalize(i.viewDirWS);
-                float3 H = normalize(L + V);
-                float NdotL = dot(N, L);
-                float NdotH = dot(N, H);
-                //颜色计算
-                float3 diffuse = (0.5 * NdotL + 0.5) * _BaseColor.rgb * _MainLightColor.rgb;
-                float3 specular = pow(max(0, NdotH), _SpecularExp) * _SpecularStrength * _SpecularColor.rgb * _MainLightColor.rgb;
 
-                float4 finalColor = MainTex * float4((diffuse + _GlossyEnvironmentColor.rgb) + specular, 1);
-                return finalColor;
+                //描边计算
+                float3 N = TransformTangentToWorld(normalMap, TBN, true);
+                float3 V = normalize(i.viewDirWS);
+                float NdotV = dot(N,V);
+                float color = step(_Edge,NdotV);
+                return color;
             }
             ENDHLSL
         }

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_OutLine_BasedNdotV
-  m_Shader: {fileID: 4800000, guid: eacb90d2dacb15b4e9bb7041794a1f0a, type: 3}
+  m_Name: Custom_StencilTestOutline
+  m_Shader: {fileID: 4800000, guid: 08ba8da6322589445949f0343f60dec9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -33,12 +33,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _NormalScale: 6.72
-    - _Outline: 0.5
+    - _NormalScale: 1
+    - _Outline: 0.458
+    - _OutlineScale: 0.105
     - _SpecularExp: 32
     - _SpecularStrength: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EdgeColor: {r: 1, g: 0.15542823, b: 0, a: 1}
+    - _EdgeColor: {r: 1, g: 0, b: 0, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
