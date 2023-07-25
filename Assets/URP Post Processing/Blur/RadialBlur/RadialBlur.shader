@@ -16,7 +16,7 @@
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-        CBUFFER_START(UnityPerMateiral) 
+        CBUFFER_START(UnityPerMaterial) 
 
         CBUFFER_END
 
