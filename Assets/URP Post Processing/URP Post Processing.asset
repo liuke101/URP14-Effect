@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7016045462405433306
+--- !u!114 &-5289953373469600623
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,68 +9,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c35de14e735e42579d45344852541068, type: 3}
-  m_Name: GrainyBlurRenderFeature
+  m_Script: {fileID: 11500000, guid: 4b505c4ef8084b879441a731cc204b8b, type: 3}
+  m_Name: SobelOutlineRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   parameters:
-    iterations: 4
-    blurRadius: 0.09
-    downSample: 1
-    uvDistortionIterations: 10
-  blitShader: {fileID: 4800000, guid: da3469db8d174df0a2ac4d5a32fafc41, type: 3}
+    edgesOnly: 0.07
+    edgeColor: {r: 0, g: 0, b: 0, a: 1}
+    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  blitShader: {fileID: 4800000, guid: a32c37f0ced146c1bbb418ef372c7d8b, type: 3}
   settings:
     commandBufferTag: URP Post Processing
-    profilerTag: Grainy Blur Pass
+    profilerTag: SobelOutlinePass
     renderPassEvent: 550
     filterSettings:
       renderQueueType: 0
       layerMask:
         serializedVersion: 2
         m_Bits: 0
-      LightModeTags: []
---- !u!114 &-6322687472507233407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: StencilTestOutline
-  m_EditorClassIdentifier: 
-  m_Active: 1
-  settings:
-    passTag: StencilTestOutline
-    Event: 250
-    filterSettings:
-      RenderQueueType: 0
-      LayerMask:
-        serializedVersion: 2
-        m_Bits: 64
-      PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: 88a4876d000be0c4fa15272f0fe80e9c, type: 2}
-    overrideMaterialPassIndex: 0
-    overrideShader: {fileID: 0}
-    overrideShaderPassIndex: 0
-    overrideMode: 1
-    overrideDepthState: 0
-    depthCompareFunction: 0
-    enableWrite: 1
-    stencilSettings:
-      overrideStencilState: 1
-      stencilReference: 1
-      stencilCompareFunction: 8
-      passOperation: 2
-      failOperation: 0
-      zFailOperation: 0
-    cameraSettings:
-      overrideCamera: 0
-      restoreCamera: 1
-      offset: {x: 0, y: 0, z: 0, w: 0}
-      cameraFieldOfView: 60
+      lightModeTags: []
 --- !u!114 &-4212381304994736959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,8 +42,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   parameters:
-    iterations: 5
-    blurRadius: 1.8
+    iterations: 10
+    blurRadius: 1.5
     downSample: 2
   blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
   settings:
@@ -97,8 +54,53 @@ MonoBehaviour:
       renderQueueType: 0
       layerMask:
         serializedVersion: 2
-        m_Bits: 0
-      LightModeTags: []
+        m_Bits: 4294967295
+      lightModeTags:
+      - 
+--- !u!114 &-2495090014542673010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: RenderObjects
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    passTag: RenderObjects
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 64
+      PassNames:
+      - 123
+      - test
+    overrideMaterial: {fileID: 2100000, guid: 88a4876d000be0c4fa15272f0fe80e9c, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 4800000, guid: f591471898fd6374ba7985ac147323ab, type: 3}
+    overrideShaderPassIndex: 0
+    overrideMode: 0
+    overrideDepthState: 0
+    depthCompareFunction: 4
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 5
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,10 +119,9 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 3021221494960364002}
   - {fileID: -4212381304994736959}
-  - {fileID: -7016045462405433306}
-  - {fileID: 5105913927438175845}
-  - {fileID: -6322687472507233407}
-  m_RendererFeatureMap: e219e34af188ed29c1d44a71859d8ac526385515d3ffa19e650eac2aaad9db4681db64273e4d41a8
+  - {fileID: -2495090014542673010}
+  - {fileID: -5289953373469600623}
+  m_RendererFeatureMap: e219e34af188ed29c1d44a71859d8ac58e4b8ff0d9a85fdd9114f7276f4f96b6
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -193,23 +194,3 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
---- !u!114 &5105913927438175845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c04250356be43c8be4032c0a002696d, type: 3}
-  m_Name: DirectionalBlur
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  iterations: 10
-  blurRadius: 0.1
-  downSample: 1
-  offsetIterations: 11
-  angle: 249
-  blitShader: {fileID: 4800000, guid: 709e47137fc74d21a51daee9d104d0a8, type: 3}
-  renderPassEvent: 550

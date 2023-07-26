@@ -1,10 +1,11 @@
-Shader "Custom/StencilTestOutline"
+Shader "Custom/ProceduralGeometryOutline"
 {
     Properties
     {
         _MainTex ("MainTex", 2D) = "white" {}
         [HDR]_EdgeColor("EdgeColor", Color) = (0,0,0,0)
         _EdgeScale("EdgeScale", Range(0, 1)) = 0.01
+        _NormalZ("NormalZ", Range(-1, 1)) = 0.5
     }
 
     SubShader
@@ -15,14 +16,6 @@ Shader "Custom/StencilTestOutline"
             "RenderType"="Opaque"
         }
 
-        Stencil
-        {
-            Ref 0
-            Comp Equal
-            Pass IncrSat //通过则stencilBufferValue加1
-            Fail Keep //保留当前缓冲区中的内容，即stencilBUfferValue不变
-            ZFail keep
-        }
 
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -32,6 +25,7 @@ Shader "Custom/StencilTestOutline"
         float4 _EdgeColor;
         float _EdgeScale;
         float _OutlineSpace;
+        float _NormalZ;
         CBUFFER_END
 
         TEXTURE2D(_MainTex);
@@ -52,13 +46,42 @@ Shader "Custom/StencilTestOutline"
         };
         ENDHLSL
 
+        Pass
+        {
+            Name "Outline"
+            Tags
+            {
+                "LightMode" = "SRPDefaultUnlit"
+            }
+            Cull Front
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            Varyings vert(Attributes i)
+            {
+                Varyings o = (Varyings)0;
+                o.uv = TRANSFORM_TEX(i.uv, _MainTex);
+                i.normalOS.z =_NormalZ;
+                i.positionOS.xyz += normalize(i.normalOS) * _EdgeScale;
+                o.positionCS = TransformObjectToHClip(i.positionOS.xyz);
+            
+                return o;
+            }
+
+            float4 frag(Varyings i) : SV_Target
+            {
+                return _EdgeColor;
+            }
+            ENDHLSL
+        }
 
         Pass
         {
             Name "Shading"
             Tags
             {
-                "LightMode" = "SRPDefaultUnlit"
+                "LightMode" = "UniversalForward"
             }
 
             HLSLPROGRAM
@@ -81,36 +104,5 @@ Shader "Custom/StencilTestOutline"
             }
             ENDHLSL
         }
-
-        Pass
-        {
-            Name "Outline"
-            Tags
-            {
-                "LightMode" = "UniversalForward"
-            }
-
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            Varyings vert(Attributes i)
-            {
-                Varyings o = (Varyings)0;
-                o.uv = TRANSFORM_TEX(i.uv, _MainTex);
-
-                //模型空间描边，远近粗细不同
-                i.positionOS.xyz += normalize(i.normalOS) * _EdgeScale;
-                o.positionCS = TransformObjectToHClip(i.positionOS.xyz);
-            
-                return o;
-            }
-
-            float4 frag(Varyings i) : SV_Target
-            {
-                return _EdgeColor;
-            }
-            ENDHLSL
-        }
     }
-
 }

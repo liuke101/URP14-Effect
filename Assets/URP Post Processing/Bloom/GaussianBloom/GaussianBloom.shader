@@ -66,7 +66,7 @@
                 return o;
             }
 
-            // luminance明亮度公式，计算得到像素的亮度值
+            // luminance亮度公式，计算得到像素的亮度值
             float luminance(float4 color)
             {
                 return 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
