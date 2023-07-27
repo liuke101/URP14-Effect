@@ -22,8 +22,8 @@
 
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
-        float _BlurOffset;
         float4 _BlitTexture_TexelSize;
+        float _BlurOffset;
 
         struct Attributes
         {
