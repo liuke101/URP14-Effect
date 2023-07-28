@@ -23,13 +23,12 @@ public class VBufferMotionBlurRenderPass : ScriptableRenderPass
     // 变量
     //------------------------------------------------------
     private float m_blurSize; //模糊图像大小
-
+    private Matrix4x4 previousViewProjectionMatrix; //上一帧VP矩阵
     private Material m_blitMaterial;
     private RTHandle m_cameraRT;
-    private RTHandle m_velocityRT;
     private RenderTextureDescriptor m_rtDescriptor;
     private static readonly int s_BlurSize = Shader.PropertyToID("_BlurSize");
-    private static readonly int s_PreviousVpMatrix = Shader.PropertyToID("_PreviousVPMatrix");
+    private static readonly int s_PreviousVPInverseMatrix = Shader.PropertyToID("_PreviousVPInverseMatrix");
     private static readonly int s_CurrentVpInverseMatrix = Shader.PropertyToID("_CurrentVPInverseMatrix");
 
     //------------------------------------------------------
@@ -101,6 +100,7 @@ public class VBufferMotionBlurRenderPass : ScriptableRenderPass
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
 
+    
     //------------------------------------------------------
     // 每帧执行渲染逻辑
     //------------------------------------------------------
@@ -119,24 +119,17 @@ public class VBufferMotionBlurRenderPass : ScriptableRenderPass
 
         if (m_blitMaterial == null)
             return;
-
-        
+                
         //设置模糊图像大小
         m_blitMaterial.SetFloat(s_BlurSize, m_blurSize);
-        //获取上一帧使用的VP矩阵
-        Matrix4x4 previousVPMatrix = renderingData.cameraData.camera.previousViewProjectionMatrix;
-        //获取当前帧VP矩阵
-        Matrix4x4 currnetVPMatrix = renderingData.cameraData.camera.projectionMatrix * renderingData.cameraData.camera.worldToCameraMatrix;
-        //获取当前帧VP矩阵的逆矩阵
-        Matrix4x4 currentVPInverseMatrix = currnetVPMatrix.inverse;
-        //传给Shader
-        m_blitMaterial.SetMatrix(s_PreviousVpMatrix, previousVPMatrix);
-        m_blitMaterial.SetMatrix(s_CurrentVpInverseMatrix, currentVPInverseMatrix);
         
-        //将当前帧VP矩阵传给上一帧VP矩阵，以便在下一帧时传递给Shader
-        //previousVPMatrix = currnetVPMatrix;
-
-
+        //设置上一帧VP矩阵和当前帧VP逆矩阵
+        m_blitMaterial.SetMatrix("_PreviousViewProjectionMatrix", previousViewProjectionMatrix);
+        Matrix4x4 currentViewProjectionMatrix = renderingData.cameraData.camera.projectionMatrix * renderingData.cameraData.camera.worldToCameraMatrix;
+        Matrix4x4 currentViewProjectionInverseMatrix = currentViewProjectionMatrix.inverse;
+        m_blitMaterial.SetMatrix("_CurrentViewProjectionInverseMatrix", currentViewProjectionInverseMatrix);
+        previousViewProjectionMatrix = currentViewProjectionMatrix;
+        
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get(m_commandBufferTag);
 
@@ -162,9 +155,7 @@ public class VBufferMotionBlurRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-         RenderingUtils.ReAllocateIfNeeded(ref m_velocityRT, m_rtDescriptor, FilterMode.Bilinear);
-         Blitter.BlitCameraTexture(cmd, m_cameraRT, m_velocityRT, m_blitMaterial, 0);
-         Blitter.BlitCameraTexture(cmd, m_velocityRT, m_cameraRT);
+         Blitter.BlitCameraTexture(cmd, m_cameraRT, m_cameraRT, m_blitMaterial, 0);
     }
 
     //------------------------------------------------------

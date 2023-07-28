@@ -25,8 +25,8 @@
         SAMPLER(sampler_BlitTexture);
         float4 _BlitTexture_TexelSize;
         float _BlurSize;
-        float4x4 _PreviousVPMatrix;
-        float4x4 _CurrentVPInverseMatrix;
+        float4x4 _CurrentViewProjectionInverseMatrix;
+        float4x4 _PreviousViewProjectionMatrix;
 
         struct Attributes
         {
@@ -63,42 +63,46 @@
 
             float4 frag(Varyings i) : SV_Target
             {
-                //1 获取屏幕UV
+                //获取屏幕空间UV
                 float2 ScreenUV = GetNormalizedScreenSpaceUV(i.positionCS);
-                //2 从深度纹理中采样深度
+                
+                //从深度纹理中采样深度
                 #if UNITY_REVERSED_Z
                 // 具有 REVERSED_Z 的平台（如 D3D）的情况。
-                float depth = SampleSceneDepth(ScreenUV); 
+                // 返回[1,0]的非线性深度值
+                float depth = SampleSceneDepth(ScreenUV);
                 #else
                 // 没有 REVERSED_Z 的平台（如 OpenGL）的情况。
                 // 调整 Z 以匹配 OpenGL 的 NDC ([-1, 1])
-                 float depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(ScreenUV));
+                float depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(ScreenUV));
                 #endif
 
-                //3 重建世界空间位置
-               //float3 rebuildPosWS = ComputeWorldSpacePosition(ScreenUV, depth, UNITY_MATRIX_I_VP);
-               float3 rebuildPosWS = ComputeWorldSpacePosition(ScreenUV, depth, _CurrentVPInverseMatrix);
-                //4 使用前一帧的VP矩阵，对重建世界空间位置进行变换，得到前一帧在NDC下的坐标
-                float4 currentNDCPos = mul(UNITY_MATRIX_VP, float4(rebuildPosWS, 1)); //当前帧的NDC坐标
-                //得到的是一个未作齐次除法的世界坐标
-                float4 previousPosWS = mul(_PreviousVPMatrix, float4(rebuildPosWS, 1));
-                //做齐次除法转化成世界坐标
-                previousPosWS /= previousPosWS.w;
+                // 当前帧NDC空间坐标
+                float4 currentPosNDC = float4(ScreenUV.x * 2 - 1, ScreenUV.y * 2 - 1, 2*depth-1, 1);
 
-                //5 计算前一阵和当前帧在屏幕空间的位置差，得到该像素的速度向量
-                float2 velocity = currentNDCPos.xy - previousPosWS.xy;
+                //得到当前帧世界空间坐标
+                float4 D = mul(_CurrentViewProjectionInverseMatrix, currentPosNDC);
+                float4 currentPosWS = D / D.w;
 
-                //6 使用该速度值对邻域像素采样，相加后取平均得到模糊结果
-                float4 color = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, i.uv);
-                i.uv+=velocity*_BlurSize;
-                for(int it=1;it<3;it++)
+                //上一帧裁剪空间坐标
+                float4 previousPosCS = mul(_PreviousViewProjectionMatrix, currentPosWS);
+                //做齐次除法得到上一帧NDC坐标
+                float4 previousPosNDC = previousPosCS / previousPosCS.w;
+
+                // NDC坐标差作为速度向量
+                float2 velocity = currentPosNDC.xy - previousPosNDC.xy;
+
+                float2 uv = i.uv;
+                float4 color = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
+                uv += velocity * _BlurSize; //速度偏移uv进行采样
+                for (int it = 1; it < 3; it++, uv += velocity * _BlurSize)
                 {
-                    color+=SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, i.uv);
-                    i.uv+=velocity*_BlurSize;
+                    float4 currentColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
+                    color += currentColor;
                 }
-                color/=3;
-                
-                return float4(color.rgb,1);
+                color /= 3;
+
+                return half4(color.rgb, 1.0);
             }
             ENDHLSL
         }
