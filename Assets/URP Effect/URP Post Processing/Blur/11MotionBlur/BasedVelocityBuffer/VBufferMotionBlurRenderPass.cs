@@ -5,9 +5,10 @@ using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class CustomRenderPass : ScriptableRenderPass
+public class VBufferMotionBlurRenderPass : ScriptableRenderPass
 {
     #region 渲染设置
+
     private RenderQueueType m_renderQueueType;
     private RenderPassEvent m_renderPassEvent;
     private FilteringSettings m_filteringSettings;
@@ -15,33 +16,35 @@ public class CustomRenderPass : ScriptableRenderPass
     private string m_profilerTag;
     private ProfilingSampler m_profilingSampler; //FrameDebugger标记
     List<ShaderTagId> m_shaderTagIdList = new List<ShaderTagId>();
+
     #endregion
-    
+
     //------------------------------------------------------
     // 变量
     //------------------------------------------------------
-    
-    private int m_iterations; //模糊迭代次数
-    private float m_blurRadius;    //模糊范围
-    private int m_downSample;     //降采样
-    
+    private float m_blurSize; //模糊图像大小
+    private Matrix4x4 previousViewProjectionMatrix; //上一帧VP矩阵
     private Material m_blitMaterial;
     private RTHandle m_cameraRT;
     private RTHandle m_tempRT0;
-    private RTHandle m_tempRT1;
     private RenderTextureDescriptor m_rtDescriptor;
-    
+    private static readonly int s_BlurSize = Shader.PropertyToID("_BlurSize");
+    private static readonly int s_PreviousVPInverseMatrix = Shader.PropertyToID("_PreviousVPInverseMatrix");
+    private static readonly int s_CurrentVpInverseMatrix = Shader.PropertyToID("_CurrentVPInverseMatrix");
+
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public CustomRenderPass(string commandBufferTag, string profilerTag,RenderPassEvent renderPassEvent,string[] shaderTags,RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
+    public VBufferMotionBlurRenderPass(string commandBufferTag, string profilerTag, RenderPassEvent renderPassEvent,
+        string[] shaderTags, RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
     {
         #region 渲染设置相关参数
-        base.profilingSampler = new ProfilingSampler(nameof(CustomRenderPass));
+
+        base.profilingSampler = new ProfilingSampler(nameof(VBufferMotionBlurRenderPass));
         m_commandBufferTag = commandBufferTag;
         m_profilerTag = profilerTag;
         m_profilingSampler = new ProfilingSampler(profilerTag);
-        this.renderPassEvent = renderPassEvent; 
+        this.renderPassEvent = renderPassEvent;
         m_renderQueueType = renderQueueType;
         RenderQueueRange renderQueueRange = (renderQueueType == RenderQueueType.Transparent)
             ? RenderQueueRange.transparent
@@ -58,22 +61,22 @@ public class CustomRenderPass : ScriptableRenderPass
             m_shaderTagIdList.Add(new ShaderTagId("UniversalForward"));
             m_shaderTagIdList.Add(new ShaderTagId("UniversalForwardOnly"));
         }
+
         #endregion
+
         //Blit材质
         m_blitMaterial = blitMaterial;
     }
-    
+
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle colorHandle, float blurSize)
     {
         m_cameraRT = colorHandle;
-        m_iterations = iterations;
-        m_blurRadius = blurRadius;
-        m_downSample = downSample;
+        m_blurSize = blurSize;
     }
-    
+
     //------------------------------------------------------
     // 在渲染相机之前调用
     // 1.配置 Render Target 和它们的 Clear State
@@ -86,7 +89,7 @@ public class CustomRenderPass : ScriptableRenderPass
         m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
         m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
     }
-    
+
     //------------------------------------------------------
     // 在执行RenderPass之前调用，功能同OnCameraSetup
     //------------------------------------------------------
@@ -98,46 +101,52 @@ public class CustomRenderPass : ScriptableRenderPass
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
 
+    
     //------------------------------------------------------
     // 每帧执行渲染逻辑
     //------------------------------------------------------
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         #region sortingCriteria|drawingSettings
+
         //排序设置
         SortingCriteria sortingCriteria = (m_renderQueueType == RenderQueueType.Transparent)
             ? SortingCriteria.CommonTransparent
             : renderingData.cameraData.defaultOpaqueSortFlags;
         //设置渲染的Shader Pass和渲染排序
         DrawingSettings drawingSettings = CreateDrawingSettings(m_shaderTagIdList, ref renderingData, sortingCriteria);
+
         #endregion
-        
+
         if (m_blitMaterial == null)
             return;
+                
+        //设置模糊图像大小
+        m_blitMaterial.SetFloat(s_BlurSize, m_blurSize);
         
-        //设置模糊半径
-        m_blitMaterial.SetFloat("_BlurOffset", m_blurRadius);
-        
-        //降采样
-        m_rtDescriptor.width /= m_downSample; 
-        m_rtDescriptor.height /= m_downSample;
+        //设置上一帧VP矩阵和当前帧VP逆矩阵
+        m_blitMaterial.SetMatrix("_PreviousViewProjectionMatrix", previousViewProjectionMatrix);
+        Matrix4x4 currentViewProjectionMatrix = renderingData.cameraData.camera.projectionMatrix * renderingData.cameraData.camera.worldToCameraMatrix;
+        Matrix4x4 currentViewProjectionInverseMatrix = currentViewProjectionMatrix.inverse;
+        m_blitMaterial.SetMatrix("_CurrentViewProjectionInverseMatrix", currentViewProjectionInverseMatrix);
+        previousViewProjectionMatrix = currentViewProjectionMatrix;
         
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get(m_commandBufferTag);
-        
+
         //ProfilingScope
         using (new ProfilingScope(cmd, m_profilingSampler))
         {
             Render(cmd);
         }
-        
+
         //执行命令缓冲区中的命令
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
-        
+
         //绘制对象
         context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_filteringSettings);
-        
+
         //释放命令缓冲区
         CommandBufferPool.Release(cmd);
     }
@@ -147,47 +156,12 @@ public class CustomRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        // 单Pass
-        //创建临时RT0
-        // RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        // Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        // for (int i = 0; i < m_iterations; i++)
-        // {
-        //     //创建临时RT1
-        //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
-        //     Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //     CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
-        //     m_tempRT1?.rt.Release();
-        // }
-        //
-        // //最后 RT0 -> destination
-        // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
-        // m_tempRT0?.rt.Release();
-        
-        //双Pass，乒乓Blit
-        //创建临时RT0
-        RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
         Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        for (int i = 0; i < m_iterations; i++)
-        {
-            //第一轮 RT0 -> RT1
-            //创建临时RT1
-            RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-            m_tempRT0?.rt.Release();
-            //第二轮 RT1 -> RT0
-            //创建临时RT0
-            RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-            Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
-            m_tempRT1?.rt.Release();
-        }
-        
-        //最后 RT0 -> destination
-        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 0);
         m_tempRT0?.rt.Release();
-        
     }
-    
+
     //------------------------------------------------------
     // 相机堆栈中的所有相机都会调用
     // 释放创建的资源
@@ -196,7 +170,7 @@ public class CustomRenderPass : ScriptableRenderPass
     {
         base.OnCameraCleanup(cmd);
     }
-    
+
     //------------------------------------------------------
     // 渲染完相机堆栈中的最后一个相机后调用一次
     // 释放创建的资源

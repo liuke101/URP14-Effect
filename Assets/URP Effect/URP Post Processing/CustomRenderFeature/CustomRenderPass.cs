@@ -5,7 +5,7 @@ using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class SobelOutlineRenderPass : ScriptableRenderPass
+public class CustomRenderPass : ScriptableRenderPass
 {
     #region 渲染设置
     private RenderQueueType m_renderQueueType;
@@ -21,27 +21,22 @@ public class SobelOutlineRenderPass : ScriptableRenderPass
     // 变量
     //------------------------------------------------------
     
-    private float m_edgesOnly = 0.0f; //边缘线强度
-    private Color m_edgeColor = Color.black; //描边颜色
-    private Color m_backgroundColor = Color.white; //背景颜色
+    private int m_iterations; //模糊迭代次数
+    private float m_blurRadius;    //模糊范围
+    private int m_downSample;     //降采样
     
-
     private Material m_blitMaterial;
     private RTHandle m_cameraRT;
     private RTHandle m_tempRT0;
-    private RTHandle m_tempRT1;
     private RenderTextureDescriptor m_rtDescriptor;
-    private static readonly int s_EdgesOnly = Shader.PropertyToID("_EdgesOnly");
-    private static readonly int s_EdgeColor = Shader.PropertyToID("_EdgeColor");
-    private static readonly int s_BackgroundColor = Shader.PropertyToID("_BackgroundColor");
-
+    
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
-    public SobelOutlineRenderPass(string commandBufferTag, string profilerTag,RenderPassEvent renderPassEvent,string[] shaderTags,RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
+    public CustomRenderPass(string commandBufferTag, string profilerTag,RenderPassEvent renderPassEvent,string[] shaderTags,RenderQueueType renderQueueType, int layerMask, Material blitMaterial)
     {
         #region 渲染设置相关参数
-        base.profilingSampler = new ProfilingSampler(nameof(SobelOutlineRenderPass));
+        base.profilingSampler = new ProfilingSampler(nameof(CustomRenderPass));
         m_commandBufferTag = commandBufferTag;
         m_profilerTag = profilerTag;
         m_profilingSampler = new ProfilingSampler(profilerTag);
@@ -63,6 +58,7 @@ public class SobelOutlineRenderPass : ScriptableRenderPass
             m_shaderTagIdList.Add(new ShaderTagId("UniversalForwardOnly"));
         }
         #endregion
+        
         //Blit材质
         m_blitMaterial = blitMaterial;
     }
@@ -70,12 +66,12 @@ public class SobelOutlineRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, float edgesOnly, Color edgeColor, Color backgroundColor)
+    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
     {
         m_cameraRT = colorHandle;
-        m_edgesOnly = edgesOnly;
-        m_edgeColor = edgeColor;
-        m_backgroundColor = backgroundColor;
+        m_iterations = iterations;
+        m_blurRadius = blurRadius;
+        m_downSample = downSample;
     }
     
     //------------------------------------------------------
@@ -114,19 +110,20 @@ public class SobelOutlineRenderPass : ScriptableRenderPass
             : renderingData.cameraData.defaultOpaqueSortFlags;
         //设置渲染的Shader Pass和渲染排序
         DrawingSettings drawingSettings = CreateDrawingSettings(m_shaderTagIdList, ref renderingData, sortingCriteria);
+        
+        
         #endregion
         
         if (m_blitMaterial == null)
             return;
         
-        //设置边缘线强度
-        m_blitMaterial.SetFloat(s_EdgesOnly, m_edgesOnly);
-        //设置描边颜色
-        m_blitMaterial.SetColor(s_EdgeColor, m_edgeColor);
-        //设置背景颜色
-        m_blitMaterial.SetColor(s_BackgroundColor, m_backgroundColor);
+        //设置模糊半径
+        m_blitMaterial.SetFloat("_BlurOffset", m_blurRadius);
         
-
+        //降采样
+        m_rtDescriptor.width /= m_downSample; 
+        m_rtDescriptor.height /= m_downSample;
+        
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get(m_commandBufferTag);
         
@@ -152,7 +149,52 @@ public class SobelOutlineRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     private void Render(CommandBuffer cmd)
     {
-        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_cameraRT, m_blitMaterial, 0);
+        RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
+        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 0);
+        //cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_tempRT0.name));
+        m_tempRT0.rt.Release();
+        
+        // 单Pass
+        //创建临时RT0
+        // RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        // Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
+        // for (int i = 0; i < m_iterations; i++)
+        // {
+        //     //创建临时RT1
+        //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
+        //     Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
+        //     CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
+        //     m_tempRT1?.rt.Release();
+        // }
+        //
+        // //最后 RT0 -> destination
+        // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
+        // m_tempRT0?.rt.Release();
+        
+        
+        // //双Pass，乒乓Blit
+        // //创建临时RT0
+        //  RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        //  Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
+        //  for (int i = 0; i < m_iterations; i++)
+        //  {
+        //      //第一轮 RT0 -> RT1
+        //      //创建临时RT1
+        //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
+        //      Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
+        //      m_tempRT0?.rt.Release();
+        //      Blit(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
+        //      //第二轮 RT1 -> RT0
+        //      //创建临时RT0
+        //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
+        //      Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
+        //      m_tempRT1?.rt.Release();
+        //  }
+        //
+        //  //最后 RT0 -> destination
+        //  Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
+        //  m_tempRT0?.rt.Release();
     }
     
     //------------------------------------------------------
