@@ -13,10 +13,15 @@ public class ScanLineRenderFeature : ScriptableRendererFeature
     [System.Serializable]
     public class RenderParameters
     {
+        [Range(0, 1)] public float lineSpace = 0.2f; //扫描线间距
         [Range(0, 1)] public float lineWidth = 0.02f; //扫描线宽度
         
         [ColorUsageAttribute(true, true)]
-        public Color lineColor = Color.white; //扫描线颜色
+        public Color lineColorX = Color.red; //扫描线颜色
+        [ColorUsageAttribute(true, true)]
+        public Color lineColorY = Color.green; 
+        [ColorUsageAttribute(true, true)]
+        public Color lineColorZ = Color.blue; 
     }
 
     private ScanLineRenderPass m_renderPass; //RenderPass
@@ -36,7 +41,7 @@ public class ScanLineRenderFeature : ScriptableRendererFeature
         public string commandBufferTag = "URP Post Processing";
 
         //profiler标签名
-        public string profilerTag = "ScanLinePass";
+        public string profilerTag = "ScanLine Pass";
 
         //插入位置
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
@@ -105,7 +110,7 @@ public class ScanLineRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //设置RenderPass参数
-            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.lineWidth, parameters.lineColor);
+            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.lineSpace,parameters.lineWidth, parameters.lineColorX, parameters.lineColorY, parameters.lineColorZ);
 
             // RenderPass配置输入
             // Color: CopyColor & _CameraOpaqueTexture

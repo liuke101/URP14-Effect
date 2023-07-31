@@ -35,13 +35,13 @@ public class CustomRenderFeature : ScriptableRendererFeature
         public string commandBufferTag = "URP Post Processing";
 
         //profiler标签名
-        public string profilerTag = "CustomPass";
+        public string profilerTag = "Custom Pass";
 
         //插入位置
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
         
         //配置输入
-        public ScriptableRenderPassInput renderPassInput = ScriptableRenderPassInput.Color;
+        public ScriptableRenderPassInput renderPassInput = ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth;
         
         //过滤设置
         public FilterSettings filterSettings = new FilterSettings();
@@ -113,7 +113,6 @@ public class CustomRenderFeature : ScriptableRendererFeature
             // Normal: DepthNormalPrePass & _CameraDepthNormalsTexture
             // Motion: MotionVectors & _CameraMotionVectorsTexture
             m_renderPass.ConfigureInput(settings.renderPassInput);
-            
         }
     }
 

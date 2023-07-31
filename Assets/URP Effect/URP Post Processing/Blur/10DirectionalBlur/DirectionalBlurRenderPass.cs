@@ -126,12 +126,12 @@ public class DirectionalBlurRenderPass : ScriptableRenderPass
             RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
             Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
             CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
-            m_tempRT1?.rt.Release();
+            m_tempRT1?.Release();
         }
 
         //最后 RT0 -> destination
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
-        m_tempRT0?.rt.Release();
+        m_tempRT0?.Release();
     }
 
     //------------------------------------------------------

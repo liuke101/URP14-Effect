@@ -21,15 +21,21 @@ public class ScanLineRenderPass : ScriptableRenderPass
     // 变量
     //------------------------------------------------------
 
+    private float m_lineSpace;
     private float m_lineWidth;
-    private Color m_lineColor;
+    private Color m_lineColorX;
+    private Color m_lineColorY;
+    private Color m_lineColorZ;
     
     private Material m_blitMaterial;
     private RTHandle m_cameraRT;
     private RTHandle m_tempRT0;
     private RenderTextureDescriptor m_rtDescriptor;
+    private static readonly int s_LineSpace = Shader.PropertyToID("_LineSpace");
     private static readonly int s_LineWidth = Shader.PropertyToID("_LineWidth");
-    private static readonly int s_LineColor = Shader.PropertyToID("_LineColor");
+    private static readonly int s_LineColorX = Shader.PropertyToID("_LineColorX");
+    private static readonly int s_LineColorY = Shader.PropertyToID("_LineColorY");
+    private static readonly int s_LineColorZ = Shader.PropertyToID("_LineColorZ");
 
     //------------------------------------------------------
     // 构造函数
@@ -67,11 +73,14 @@ public class ScanLineRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, float edgeWidth,Color lineColor )
+    public void SetRenderPass(RTHandle colorHandle,float lineSpace, float edgeWidth,Color lineColorX,Color lineColorY,Color lineColorZ)
     {
+        m_lineSpace = lineSpace;
         m_cameraRT = colorHandle;
         m_lineWidth = edgeWidth;
-        m_lineColor = lineColor;
+        m_lineColorX = lineColorX;
+        m_lineColorY = lineColorY;
+        m_lineColorZ = lineColorZ;
     }
     
     //------------------------------------------------------
@@ -85,6 +94,8 @@ public class ScanLineRenderPass : ScriptableRenderPass
         //获取RTDescriptor，描述RT的信息
         m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
         m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
+        
+        
     }
     
     //------------------------------------------------------
@@ -117,10 +128,15 @@ public class ScanLineRenderPass : ScriptableRenderPass
         if (m_blitMaterial == null)
             return;
         
+        //设置边缘间距
+        m_blitMaterial.SetFloat(s_LineSpace, m_lineSpace);
         //设置边缘宽度
         m_blitMaterial.SetFloat(s_LineWidth, m_lineWidth);
         //设置边缘颜色
-        m_blitMaterial.SetColor(s_LineColor, m_lineColor);
+        m_blitMaterial.SetColor(s_LineColorX, m_lineColorX);
+        m_blitMaterial.SetColor(s_LineColorY, m_lineColorY);
+        m_blitMaterial.SetColor(s_LineColorZ, m_lineColorZ);
+        
         
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get(m_commandBufferTag);
@@ -148,10 +164,10 @@ public class ScanLineRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
-        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 0);
-        m_tempRT0?.rt.Release();
+        Blitter.BlitCameraTexture(cmd,  m_cameraRT, m_tempRT0 ,m_blitMaterial, 0);
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
     }
+    
     
     //------------------------------------------------------
     // 相机堆栈中的所有相机都会调用
@@ -159,8 +175,8 @@ public class ScanLineRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        
         base.OnCameraCleanup(cmd);
+        m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

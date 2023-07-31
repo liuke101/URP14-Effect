@@ -1,5 +1,34 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6595033744340642281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97cf1388a0c4d1a98de29cc40f9eeb8, type: 3}
+  m_Name: CustomRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    iterations: 4
+    blurRadius: 2
+    downSample: 5
+  blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: Custom Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
 --- !u!114 &-5066403080166215094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24,7 +53,7 @@ MonoBehaviour:
       layerMask:
         m_Bits: 0
       lightModeTags: []
---- !u!114 &-3571120953604036705
+--- !u!114 &-4137393740251934013
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -33,20 +62,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b97cf1388a0c4d1a98de29cc40f9eeb8, type: 3}
-  m_Name: CustomRenderFeature
+  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
+  m_Name: ScanLineRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   parameters:
-    iterations: 1
-    blurRadius: 0
-    downSample: 2
-  blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
+    lineSpace: 0.353
+    lineWidth: 0.015
+    lineColorX: {r: 8, g: 0, b: 0, a: 1}
+    lineColorY: {r: 0, g: 1, b: 0, a: 1}
+    lineColorZ: {r: 0, g: 0, b: 1, a: 1}
+  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
   settings:
     commandBufferTag: URP Post Processing
-    profilerTag: CustomPass
+    profilerTag: ScanLine Pass
     renderPassEvent: 550
-    renderPassInput: 4
+    renderPassInput: 5
     filterSettings:
       renderQueueType: 0
       layerMask:
@@ -101,9 +132,8 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 6348017139771432088}
-  - {fileID: -3571120953604036705}
-  m_RendererFeatureMap: 98dc2a94f4af18589f277ace69d470ce
+  - {fileID: -4137393740251934013}
+  m_RendererFeatureMap: c3d25b68500695c6
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -141,6 +171,53 @@ MonoBehaviour:
   m_CopyDepthMode: 2
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &1325919059309863808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
+  m_Name: ScanLineRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    lineSpace: 0.547
+    lineWidth: 0.111
+    lineColorX: {r: 1, g: 0, b: 0, a: 1}
+    lineColorY: {r: 0, g: 1, b: 0, a: 1}
+    lineColorZ: {r: 0, g: 0, b: 1, a: 1}
+  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: ScanLine Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &4938605765049058561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb7d674a29e7dfd449960cb3ddaeb434, type: 3}
+  m_Name: ColorBlitRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_Shader: {fileID: 4800000, guid: 4c16b051453768a438f03a2ec44e54e0, type: 3}
+  m_Intensity: 1.14
+  m_Material: {fileID: 0}
 --- !u!114 &5109323394065333100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,7 +257,7 @@ MonoBehaviour:
       layerMask:
         m_Bits: 0
       lightModeTags: []
---- !u!114 &6348017139771432088
+--- !u!114 &6371404345465829296
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -189,17 +266,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
-  m_Name: ScanLineRenderFeature
+  m_Script: {fileID: 11500000, guid: b97cf1388a0c4d1a98de29cc40f9eeb8, type: 3}
+  m_Name: CustomRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   parameters:
-    lineWidth: 0.086
-    lineColor: {r: 0, g: 2, b: 0, a: 1}
-  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
+    iterations: 8
+    blurRadius: 1.87
+    downSample: 4
+  blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
   settings:
     commandBufferTag: URP Post Processing
-    profilerTag: ScanLinePass
+    profilerTag: Custom Pass
     renderPassEvent: 550
     renderPassInput: 5
     filterSettings:

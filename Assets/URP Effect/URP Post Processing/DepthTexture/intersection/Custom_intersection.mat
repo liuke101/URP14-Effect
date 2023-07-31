@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Custom_intersection
+  m_Shader: {fileID: 4800000, guid: 5adf816a642bfd44c8cd08e04489c45f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 762018e2b0d4e2d40a4895874df0c245, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthFadeDistance: 0.45
+    - _DepthFadePower: 2.14
+    - _DepthFadeScale: 1.26
+    - _DepthOffset: 8.1
+    - _DepthSize: 0.06
+    - _EdgePower: 3.7
+    - _EdgeScale: 2.09
+    - _EdgeWidth: 0.39
+    - _F0: 1
+    - _FresnelPower: 5.13
+    - _FresnelScale: 1.54
+    - _NormalScale: 1
+    - _SpecularExp: 32
+    - _SpecularPower: 32
+    - _SpecularScale: 1
+    - _SpecularStrength: 1
+    - _WhiteEdgeWidth: 0.633
+    - __FresnelScale: 10
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DepthFadeColor: {r: 0.17937374, g: 0.17937374, b: 1.8301886, a: 1}
+    - _EdgeColor: {r: 1, g: 0, b: 0, a: 1}
+    - _FresnelColor: {r: 0.46171033, g: 0.5260872, b: 0.8679245, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WhiteEdgeColor: {r: 3.0704083, g: 3.346668, b: 6.8679247, a: 1}
+  m_BuildTextureStacks: []

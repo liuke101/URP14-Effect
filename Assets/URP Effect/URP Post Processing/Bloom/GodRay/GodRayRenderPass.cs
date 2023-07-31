@@ -140,14 +140,14 @@ public class GodRayRenderPass : ScriptableRenderPass
             RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
             Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 1);
             CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
-            m_tempRT1?.rt.Release();
+            m_tempRT1?.Release();
         }
         // 3.将完成模糊后的结果传递给材质中的_Bloom纹理属性
         m_blitMaterial.SetTexture(s_BloomTexture, m_tempRT0.rt);
         
         // 4.最后调用第三个pass， RT0 -> destination
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 2);
-        m_tempRT0?.rt.Release();
+        m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

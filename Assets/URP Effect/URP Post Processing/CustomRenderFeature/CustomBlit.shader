@@ -1,4 +1,4 @@
-﻿Shader "URPPostProcessing/Blur/CustomBlur"
+﻿Shader "URPPostProcessing/Blur/CustomBlit"
 {
     Properties {}
     
@@ -23,7 +23,6 @@
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
         float4 _BlitTexture_TexelSize;
-        float _BlurOffset;
         
         struct Attributes
         {
@@ -39,7 +38,7 @@
 
         Pass
         {
-            Name "CustomBlur"
+            Name "CustomBlit"
             
             Tags
             {
@@ -60,6 +59,7 @@
 
             float4 frag(Varyings i) : SV_Target
             {
+                
                 float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv);
                 
                 return color;

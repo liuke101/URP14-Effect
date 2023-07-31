@@ -131,19 +131,19 @@ public class GaussianBloomRenderPass : ScriptableRenderPass
             //创建临时RT1
             RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor,FilterMode.Bilinear);
             Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 1);
-            m_tempRT0?.rt.Release();
+            m_tempRT0?.Release();
             //第二轮 RT1 -> RT0
             //创建临时RT0
             RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor,FilterMode.Bilinear);
             Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 2);
-            m_tempRT1?.rt.Release();
+            m_tempRT1?.Release();
         }
         // 3.将完成高斯模糊后的结果传递给材质中的_Bloom纹理属性
         m_blitMaterial.SetTexture(s_BloomTexture, m_tempRT0.rt);
         
         // 4.最后调用第四个pass， RT0 -> destination
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 3);
-        m_tempRT0?.rt.Release();
+        m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

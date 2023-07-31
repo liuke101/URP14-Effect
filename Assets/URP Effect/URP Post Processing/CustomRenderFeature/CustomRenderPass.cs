@@ -26,7 +26,7 @@ public class CustomRenderPass : ScriptableRenderPass
     private int m_downSample;     //降采样
     
     private Material m_blitMaterial;
-    private RTHandle m_cameraRT;
+    private RTHandle m_cameraColorRT;
     private RTHandle m_tempRT0;
     private RenderTextureDescriptor m_rtDescriptor;
     
@@ -66,9 +66,9 @@ public class CustomRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle colorHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle cameraColorTargetHandle, int iterations, float blurRadius, int downSample)
     {
-        m_cameraRT = colorHandle;
+        m_cameraColorRT = cameraColorTargetHandle;
         m_iterations = iterations;
         m_blurRadius = blurRadius;
         m_downSample = downSample;
@@ -78,12 +78,13 @@ public class CustomRenderPass : ScriptableRenderPass
     // 在渲染相机之前调用
     // 1.配置 Render Target 和它们的 Clear State
     // 2.创建临时渲染目标纹理。
-    // 3.不要调用 CommandBuffer.SetRenderTarget. 而应该是 ConfigureTarget 和 ConfigureClear`）
+    // 3.不要调用 CommandBuffer.SetRenderTarget. 而应该是 ConfigureTarget 和 ConfigureClear）
     //------------------------------------------------------
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         //获取RTDescriptor，描述RT的信息
         m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+        
         m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
     }
     
@@ -93,7 +94,7 @@ public class CustomRenderPass : ScriptableRenderPass
     public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
     {
         //相机RT
-        ConfigureTarget(m_cameraRT);
+        ConfigureTarget(m_cameraColorRT);
         //清除颜色
         //ConfigureClear(ClearFlag.All, Color.clear);
     }
@@ -132,7 +133,6 @@ public class CustomRenderPass : ScriptableRenderPass
         {
             Render(cmd);
         }
-        
         //执行命令缓冲区中的命令
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
@@ -150,11 +150,15 @@ public class CustomRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
-        Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 0);
-        //cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_tempRT0.name));
-        m_tempRT0.rt.Release();
+        Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0, m_blitMaterial, 0);
+        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT);
         
+        // if (m_tempRT0 != null)
+        // {
+        //     CoreUtils.Destroy(m_tempRT0);
+        //     m_tempRT0 = null;
+        // }
+        //
         // 单Pass
         //创建临时RT0
         // RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
@@ -165,12 +169,12 @@ public class CustomRenderPass : ScriptableRenderPass
         //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
         //     Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
         //     CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
-        //     m_tempRT1?.rt.Release();
+        //     m_tempRT1?.Release();
         // }
         //
         // //最后 RT0 -> destination
         // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
-        // m_tempRT0?.rt.Release();
+        // m_tempRT0?.Release();
         
         
         // //双Pass，乒乓Blit
@@ -183,27 +187,28 @@ public class CustomRenderPass : ScriptableRenderPass
         //      //创建临时RT1
         //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
         //      Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //      m_tempRT0?.rt.Release();
+        //      m_tempRT0?.Release();
         //      Blit(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
         //      //第二轮 RT1 -> RT0
         //      //创建临时RT0
         //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
         //      Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
-        //      m_tempRT1?.rt.Release();
+        //      m_tempRT1?.Release();
         //  }
         //
         //  //最后 RT0 -> destination
         //  Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
-        //  m_tempRT0?.rt.Release();
+        //  m_tempRT0?.Release();
     }
+
     
     //------------------------------------------------------
-    // 相机堆栈中的所有相机都会调用
-    // 释放创建的资源
+    // 渲染后，相机堆栈中的所有相机每帧都会调用
+    // 释放创建的资源（如果在多个帧中不需要这些资源）
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        base.OnCameraCleanup(cmd);
+        m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

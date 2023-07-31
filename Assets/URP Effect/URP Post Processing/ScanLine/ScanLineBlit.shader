@@ -25,9 +25,16 @@
 
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
+        
+
+        TEXTURE2D_X(_CameraOpaqueTexture);
+        SAMPLER(sampler_CameraOpaqueTexture);
         float4 _BlitTexture_TexelSize;
+        float _LineSpace;
         float _LineWidth;
-        float4  _LineColor;
+        float4  _LineColorX;
+        float4  _LineColorY;
+        float4  _LineColorZ;
         
 
         struct Attributes
@@ -79,11 +86,18 @@
                 float3 rebuildPosWS = ComputeWorldSpacePosition(ScreenUV, depth, UNITY_MATRIX_I_VP);
                     
                 //frac取小数
-                float3 fracPos = frac(rebuildPosWS);
+                float3 fracPos = frac(rebuildPosWS * (1 - _LineSpace));
                 //step函数，如果x<=y，返回1，否则返回0
                 float3 stepPos = step(fracPos, _LineWidth);
 
-                return float4(stepPos*_LineColor.rgb,1);
+                //线条颜色
+                float3 lineColor = stepPos.x * _LineColorX + stepPos.y * _LineColorY + stepPos.z * _LineColorZ;
+
+                //线条颜色乘以原图
+                float4 finalColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv);
+
+                float4 ScreenColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture,sampler_CameraOpaqueTexture,ScreenUV);
+                return ScreenColor + float4(lineColor, 1);
             }
             ENDHLSL
         }
