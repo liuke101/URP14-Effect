@@ -53,7 +53,7 @@ MonoBehaviour:
       layerMask:
         m_Bits: 0
       lightModeTags: []
---- !u!114 &-4137393740251934013
+--- !u!114 &-4147102857826593486
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -62,28 +62,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
-  m_Name: ScanLineRenderFeature
+  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
+  m_Name: ConfigureInput
   m_EditorClassIdentifier: 
-  m_Active: 0
-  parameters:
-    lineSpace: 0.353
-    lineWidth: 0.015
-    lineColorX: {r: 8, g: 0, b: 0, a: 1}
-    lineColorY: {r: 0, g: 1, b: 0, a: 1}
-    lineColorZ: {r: 0, g: 0, b: 1, a: 1}
-  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
-  settings:
-    commandBufferTag: URP Post Processing
-    profilerTag: ScanLine Pass
-    renderPassEvent: 550
-    renderPassInput: 5
-    filterSettings:
-      renderQueueType: 0
-      layerMask:
-        serializedVersion: 2
-        m_Bits: 0
-      lightModeTags: []
+  m_Active: 1
+  renderPassInput: 7
 --- !u!114 &-1899893934418374905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,14 +109,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de640fe3d0db1804a85f9fc8f5cadab6, type: 3}
-  m_Name: URP Post Processing
+  m_Name: CustomRenderFeature
   m_EditorClassIdentifier: 
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: -4137393740251934013}
-  m_RendererFeatureMap: c3d25b68500695c6
+  - {fileID: -4147102857826593486}
+  m_RendererFeatureMap: 32153d50ec8772c6
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -167,8 +150,8 @@ MonoBehaviour:
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
-  m_DepthPrimingMode: 1
-  m_CopyDepthMode: 2
+  m_DepthPrimingMode: 0
+  m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
 --- !u!114 &1325919059309863808

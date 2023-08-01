@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 762018e2b0d4e2d40a4895874df0c245, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -33,7 +33,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DepthFadeDistance: 0.45
+    - _DepthFadeDistance: 0.43
     - _DepthFadePower: 2.14
     - _DepthFadeScale: 1.26
     - _DepthOffset: 8.1
