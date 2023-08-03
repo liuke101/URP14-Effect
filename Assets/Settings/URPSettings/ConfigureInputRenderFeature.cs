@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ConfigureInput : ScriptableRendererFeature
+public class ConfigureInputRenderFeature : ScriptableRendererFeature
 {
     class CustomRenderPass : ScriptableRenderPass
     {
