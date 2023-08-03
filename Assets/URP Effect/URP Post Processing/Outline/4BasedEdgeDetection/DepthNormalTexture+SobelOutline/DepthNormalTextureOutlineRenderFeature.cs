@@ -15,6 +15,7 @@ public class DepthNormalTextureOutlineRenderFeature : ScriptableRendererFeature
     {
         [Range(0, 1)]
         public float edgesOnly = 0.0f; //边缘线强度,0为边缘线叠加到原图像，1为只显示边缘线
+        [ColorUsageAttribute(true, true)]
         public Color edgeColor = Color.black; //描边颜色
         public Color backgroundColor = Color.white; //背景颜色
         

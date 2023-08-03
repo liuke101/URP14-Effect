@@ -8,10 +8,10 @@ Shader "Custom/ToonWater"
         _NormalScale("NormalScale", Range(0, 10)) = 1
 
         [Header(Depth)]
-        _DepthDifference("深度差", Range(0, 100)) = 10
+        _MaxDepth("最大深度", Range(0, 1000)) = 10
         [HDR]_DepthColor("深水区颜色", Color) = (0,0,1,1)
         [HDR]_ShallowColor("浅水区颜色", Color) = (0,1,1,1)
-        
+       
         [Header(Foam)]
         _SurfaceNoise("水面噪声贴图", 2D) = "white" {}
         _SurfaceNoiseCutoff("噪声贴图裁切", Range(0, 1)) = 0.777
@@ -26,6 +26,10 @@ _FoamMinDistance("Foam Minimum Distance", Range(0,10)) = 0.04
         
         [Header(Settings)]
         _TimeSpeed("水流速度", Vector) = (0.03,0.03,0,1)
+        
+        _WaterHeight("水面高度", Range(0, 10)) = 0
+         [HDR] _WaterColor("水面颜色", Color) = (1,1,1,1)
+        
     }
 
     HLSLINCLUDE
@@ -39,9 +43,10 @@ _FoamMinDistance("Foam Minimum Distance", Range(0,10)) = 0.04
     float4 _BaseColor;
     float _NormalScale;
 
-    float _DepthDifference;
+    float _MaxDepth;
     float4 _DepthColor;
     float4 _ShallowColor;
+   
     float4 _SurfaceNoise_ST;
     float _SurfaceNoiseCutoff;
     float _FoamDistance;
@@ -51,6 +56,10 @@ float _FoamMinDistance;
     float2 _TimeSpeed;
 
     float _FlowSpeed;
+
+
+     float4 _WaterColor;
+    float _WaterHeight;
 
     
     CBUFFER_END
@@ -147,21 +156,24 @@ float _FoamMinDistance;
                 //--------------------------------------------
                 // 水面颜色
                 //--------------------------------------------
-                //用深度纹理和屏幕空间uv重建像素的世界空间位置
+                //采样深度纹理
                 float2 ScreenUV = GetNormalizedScreenSpaceUV(i.positionCS);
                 #if UNITY_REVERSED_Z
                 float depth = SampleSceneDepth(ScreenUV);
                 #else
                 float depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(ScreenUV));
                 #endif
-                //采样深度图
-                float linearDepth = LinearEyeDepth(depth, _ZBufferParams);
+                //线性深度
+                float linearEyeDepth = LinearEyeDepth(depth, _ZBufferParams);
                 //水面深度
                 float waterSurfaceDepth = i.positionCS.w;
-                float depthDifference = linearDepth - waterSurfaceDepth;
-                float waterDepthDifference = saturate(depthDifference / _DepthDifference);
-                //混合深水区，浅水区
+                //深度差
+                float depthDifference = linearEyeDepth - waterSurfaceDepth;
+                //除以最大水深，计算权重
+                float waterDepthDifference = saturate(depthDifference / _MaxDepth);
+                //插值深水区，浅水区
                 float4 WaterColor = lerp(_ShallowColor, _DepthColor, waterDepthDifference);
+
 
                 //--------------------------------------------
                 // 泡沫
@@ -176,22 +188,26 @@ float _FoamMinDistance;
                 float tex0 = SAMPLE_TEXTURE2D(_SurfaceNoise, sampler_SurfaceNoise, noiseUV-flowDir.xy*phase0).rgb;
                 float tex1 = SAMPLE_TEXTURE2D(_SurfaceNoise, sampler_SurfaceNoise, noiseUV-flowDir.xy*phase1).rgb;
                 float NoiseFlowTex = lerp(tex0,tex1,abs((0.5-phase0)/0.5));
+                
                 //泡沫深度
                 float3 NormalsTexture = SampleSceneNormals(ScreenUV); //法线纹理
-                float3 normalDot = saturate(dot(NormalsTexture, normalVS)); //法线纹理点积观察空间法线,相机视线平行与水面时值最大。
+                
+                float3 normalDot = saturate(dot(NormalsTexture, normalVS)); //法线纹理点积观察空间法线
+                
                 float foamDistance = lerp(_FoamMaxDistance, _FoamMinDistance, normalDot);
                 float foamDepthDifference = saturate(depthDifference / foamDistance);
+
                 //越深裁剪值越大
                 float FoamNoiseCutoff = foamDepthDifference * _SurfaceNoiseCutoff;
                 //卡通硬边会有锯齿
                 //float FoamNoise = NoiseFlowTex > FoamNoiseCutoff ? 1 : 0;
                 //抗锯齿：平滑过渡
                 float FoamNoise = smoothstep(FoamNoiseCutoff-_FoamEdgeFade,FoamNoiseCutoff+_FoamEdgeFade,NoiseFlowTex);
-                
-                //采样法线纹理
+
                 //卡通水
                 float4 finalColor = WaterColor + FoamNoise;
-                return float4(finalColor.rgb, 0.8);
+
+                return finalColor;
                 
             }
             ENDHLSL

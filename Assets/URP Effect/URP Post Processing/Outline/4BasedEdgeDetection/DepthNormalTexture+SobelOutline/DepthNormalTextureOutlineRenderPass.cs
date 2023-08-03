@@ -172,7 +172,7 @@ public class DepthNormalTextureOutlineRenderPass : ScriptableRenderPass
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
         Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 0);
-        m_tempRT0?.Release();
+        
     }
     
     //------------------------------------------------------
@@ -181,7 +181,7 @@ public class DepthNormalTextureOutlineRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        base.OnCameraCleanup(cmd);
+        m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

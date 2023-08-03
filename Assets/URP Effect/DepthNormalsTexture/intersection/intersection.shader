@@ -161,14 +161,7 @@ Shader "Custom/intersection"
                 //--------------------------------
                 //rebuildPosWS一般来说>=i.positionWS
                 float3 posDistance = saturate(distance(rebuildPosWS, i.positionWS) / _DepthFadeDistance);
-
-
-                //观察空间深度和线性深度比较？
-                //float3 positonVS=TransformWorldToView(i.positionWS);
                 
-                //float3 posDistance =saturate(1-(linearEyeDepth - positonVS.z)/5)*float3(1,0,0);
-                
-
                 float3 whiteEdge = 1 - posDistance;
 
                 //计算过渡颜色
@@ -193,7 +186,6 @@ Shader "Custom/intersection"
                 }
 
 
-                //return finalColor;
             }
             ENDHLSL
         }

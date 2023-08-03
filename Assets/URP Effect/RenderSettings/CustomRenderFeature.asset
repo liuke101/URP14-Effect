@@ -1,5 +1,51 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8124792691596009863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b505c4ef8084b879441a731cc204b8b, type: 3}
+  m_Name: SobelOutlineRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    edgesOnly: 0
+    edgeColor: {r: 0, g: 0, b: 0, a: 1}
+    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  blitShader: {fileID: 4800000, guid: a32c37f0ced146c1bbb418ef372c7d8b, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: SobelOutlinePass
+    renderPassEvent: 550
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &-6859365664831712052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aba577b05edb4d29a0d38077564b6eb9, type: 3}
+  m_Name: GaussianBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 2
+  blurRadius: 1
+  downSample: 3
+  blitShader: {fileID: 4800000, guid: e9a6fe079c9845fe8f7e865ed0068058, type: 3}
+  renderPassEvent: 550
 --- !u!114 &-6595033744340642281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53,7 +99,7 @@ MonoBehaviour:
       layerMask:
         m_Bits: 0
       lightModeTags: []
---- !u!114 &-4147102857826593486
+--- !u!114 &-3156356595841686485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -62,11 +108,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
-  m_Name: ConfigureInput
+  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
+  m_Name: ScanLineRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
-  renderPassInput: 7
+  m_Active: 0
+  parameters:
+    lineSpace: 0.2
+    lineWidth: 0.096
+    lineColorX: {r: 1, g: 0, b: 0, a: 1}
+    lineColorY: {r: 0, g: 1, b: 0, a: 1}
+    lineColorZ: {r: 0, g: 0, b: 1, a: 1}
+  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: ScanLine Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
 --- !u!114 &-1899893934418374905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,8 +178,13 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: -4147102857826593486}
-  m_RendererFeatureMap: 32153d50ec8772c6
+  - {fileID: -3156356595841686485}
+  - {fileID: -6859365664831712052}
+  - {fileID: 6426369035504266121}
+  - {fileID: -8124792691596009863}
+  - {fileID: 1214218206539036390}
+  - {fileID: 2519129986658154199}
+  m_RendererFeatureMap: 2b246530665e32d4ccd4313345a3cea0892bcde4960c2f5979deba0f18f03e8fe636929006c5d910d736cb3d60bff522
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -151,9 +219,38 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
-  m_CopyDepthMode: 0
+  m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &1214218206539036390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97cf1388a0c4d1a98de29cc40f9eeb8, type: 3}
+  m_Name: CustomRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    iterations: 1
+    blurRadius: 0.13
+    downSample: 2
+  blitShader: {fileID: 4800000, guid: bf41352f03e74bdebf1fff4cee010b6e, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: Custom Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
 --- !u!114 &1325919059309863808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,6 +282,20 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
+--- !u!114 &2519129986658154199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
+  m_Name: ConfigureInput
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  renderPassInput: 7
 --- !u!114 &4938605765049058561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,3 +380,17 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
+--- !u!114 &6426369035504266121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
+  m_Name: ConfigureInput
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  renderPassInput: 7

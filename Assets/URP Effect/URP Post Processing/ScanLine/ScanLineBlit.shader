@@ -26,9 +26,6 @@
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
         
-
-        TEXTURE2D_X(_CameraOpaqueTexture);
-        SAMPLER(sampler_CameraOpaqueTexture);
         float4 _BlitTexture_TexelSize;
         float _LineSpace;
         float _LineWidth;
@@ -96,8 +93,7 @@
                 //线条颜色乘以原图
                 float4 finalColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv);
 
-                float4 ScreenColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture,sampler_CameraOpaqueTexture,ScreenUV);
-                return ScreenColor + float4(lineColor, 1);
+                return finalColor + float4(lineColor, 1);
             }
             ENDHLSL
         }
