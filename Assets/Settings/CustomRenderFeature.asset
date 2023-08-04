@@ -29,6 +29,35 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
+--- !u!114 &-5141877460913036402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cb8ba88cea145398ef0dbdf767b3844, type: 3}
+  m_Name: DepthFogRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  parameters:
+    fogDensity: 1.87
+    fogColor: {r: 1, g: 1, b: 1, a: 1}
+    fogStart: 26.5
+    fogEnd: 403.2
+  blitShader: {fileID: 4800000, guid: 02e8d3d7bf8c48fca090050cc1b09d1f, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: DepthFogPass
+    renderPassEvent: 550
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
 --- !u!114 &-5066403080166215094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,6 +80,144 @@ MonoBehaviour:
     filterSettings:
       renderQueueType: 0
       layerMask:
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &-4913564863674632921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26eb55e59d6846a8918c4395e90b67ed, type: 3}
+  m_Name: ABufferMotionBlurRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    blurTrain: 0.295
+  blitShader: {fileID: 4800000, guid: ec06578779074961b26f24ad3bb5a63d, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: MotionBlurPass
+    renderPassEvent: 550
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &-4725114890146028036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f62c9c65cf3354c93be831c8bc075510, type: 3}
+  m_Name: ScreenSpaceAmbientOcclusion
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_Settings:
+    AOMethod: 0
+    Downsample: 0
+    AfterOpaque: 0
+    Source: 1
+    NormalSamples: 1
+    Intensity: 3
+    DirectLightingStrength: 0.25
+    Radius: 0.035
+    Samples: 1
+    BlurQuality: 0
+    Falloff: 100
+    SampleCount: -1
+  m_BlueNoise256Textures:
+  - {fileID: 2800000, guid: 36f118343fc974119bee3d09e2111500, type: 3}
+  - {fileID: 2800000, guid: 4b7b083e6b6734e8bb2838b0b50a0bc8, type: 3}
+  - {fileID: 2800000, guid: c06cc21c692f94f5fb5206247191eeee, type: 3}
+  - {fileID: 2800000, guid: cb76dd40fa7654f9587f6a344f125c9a, type: 3}
+  - {fileID: 2800000, guid: e32226222ff144b24bf3a5a451de54bc, type: 3}
+  - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
+  - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
+  m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &-2944904899210643998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68444339930d4a32bd4912fbbda526fe, type: 3}
+  m_Name: DualBlur
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 0
+  blurRadius: 0
+  downSample: 1
+  blitShader: {fileID: 4800000, guid: 4db70ba5f463467a9a3de2ac907a5906, type: 3}
+  renderPassEvent: 550
+--- !u!114 &-2823600757918437595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ad3b9b53db748baab1f3f8ced2ee424, type: 3}
+  m_Name: RGBSplitGlitchRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  parameters:
+    splitIntensity: 0.567
+    amplitude: 2.57
+  blitShader: {fileID: 4800000, guid: db12413c0e76417fa7b443d284858dcd, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: RGBSplitGlitch Pass
+    renderPassEvent: 550
+    renderPassInput: 4
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &-2217893829062274145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6b637ae8f4f412aa14fc05ea6bb920e, type: 3}
+  m_Name: ScanLineRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  parameters:
+    lineSpace: 0.445
+    lineWidth: 0.014
+    lineColorX: {r: 4, g: 0, b: 0, a: 1}
+    lineColorY: {r: 0, g: 1, b: 0, a: 1}
+    lineColorZ: {r: 0, g: 0, b: 2, a: 1}
+  blitShader: {fileID: 4800000, guid: 68e7ecb7a69348b1b51631ee783a8536, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: ScanLine Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
 --- !u!114 &-1899893934418374905
@@ -101,8 +268,17 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 6426369035504266121}
-  m_RendererFeatureMap: 892bcde4960c2f59
+  - {fileID: -4725114890146028036}
+  - {fileID: -2823600757918437595}
+  - {fileID: 5134156949784718824}
+  - {fileID: -2217893829062274145}
+  - {fileID: 4518053160893676320}
+  - {fileID: -5141877460913036402}
+  - {fileID: 6917533543576648512}
+  - {fileID: -2944904899210643998}
+  - {fileID: -4913564863674632921}
+  - {fileID: 5914914864760648919}
+  m_RendererFeatureMap: fce5efc90a056dbe256fbf1c128ed0d8e86d053d8b3040479f533639507538e120fb65836959b33e8ee3b02fb161a4b8403bbc721b040060e2f53dd1989821d72735d527ca82cfbbd774bc1ebbff1552
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -172,6 +348,24 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
+--- !u!114 &4518053160893676320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e877129772e45379358c29ea6e3bd38, type: 3}
+  m_Name: KawaseBlur
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  iterations: 0
+  blurRadius: 0
+  downSample: 1
+  blitShader: {fileID: 4800000, guid: 35040253c6c540269e3a2de67fe148db, type: 3}
+  renderPassEvent: 550
 --- !u!114 &4938605765049058561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,6 +421,58 @@ MonoBehaviour:
       layerMask:
         m_Bits: 0
       lightModeTags: []
+--- !u!114 &5134156949784718824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3888e9a8168e4b9a8de4627d495d2797, type: 3}
+  m_Name: ImageBlockGlitchRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  parameters:
+    blockSize: 10.3
+    timeSpeed: 9.94
+    maxRGBSplitX: 0
+    maxRGBSplitY: 0
+  blitShader: {fileID: 4800000, guid: e0df36591985412ca582038608aede4a, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: ImageBlockGlitch Pass
+    renderPassEvent: 550
+    renderPassInput: 4
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &5914914864760648919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b9be5f8315647b287c00bd656ffa6f2, type: 3}
+  m_Name: GodRay
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  iterations: 1
+  blurRadius: 0.0032
+  downSample: 1
+  radialCenter: {x: 0.5, y: 0.5}
+  radialOffsetIterations: 14
+  luminanceThreshold: 0
+  bloomIntensity: 3.02
+  blitShader: {fileID: 4800000, guid: 74be8f5f91f745a09411a571ddb1b93c, type: 3}
+  renderPassEvent: 550
 --- !u!114 &6371404345465829296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,7 +502,7 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 0
       lightModeTags: []
---- !u!114 &6426369035504266121
+--- !u!114 &6917533543576648512
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -265,8 +511,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
-  m_Name: ConfigureInput
+  m_Script: {fileID: 11500000, guid: d6a84d189f6a4a8cad91d6760a7054f5, type: 3}
+  m_Name: DepthNormalTextureOutlineRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
-  renderPassInput: 7
+  m_Active: 0
+  parameters:
+    edgesOnly: 0
+    edgeColor: {r: 0, g: 0, b: 0, a: 1}
+    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+    sampleDistance: 1
+    sensitivityDepth: 1
+    sensitivityNormals: 1
+  blitShader: {fileID: 4800000, guid: 8a4e938f9cc8441dbfddd82a990af29f, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: DepthNormalTextureOutlinePass
+    renderPassEvent: 550
+    renderPassInput: 6
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []

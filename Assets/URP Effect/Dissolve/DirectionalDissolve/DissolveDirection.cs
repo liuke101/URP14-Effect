@@ -35,9 +35,7 @@ public class DissolveDirection : MonoBehaviour
            if(x<minX)
                minX = x;
            if (x>maxX)
-           {
                maxX = x;
-           }
         }
     }
 }

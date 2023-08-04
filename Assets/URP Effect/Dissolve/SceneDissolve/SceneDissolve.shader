@@ -22,7 +22,7 @@ Shader "Custom/Dissolve/SceneDissolve"
             "RenderType"="TransparentCutout"
              "Queue"="AlphaTest"
         }
-    
+        
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         
@@ -64,7 +64,7 @@ Shader "Custom/Dissolve/SceneDissolve"
             {
                 "LightMode" = "UniversalForward"
             }
-            
+            Cull Off
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -98,7 +98,7 @@ Shader "Custom/Dissolve/SceneDissolve"
                  float edge = externalEdge-internalEdge;
                 //return float4(edge.xxx,1);
                 
-                 float4 finalColor = lerp(MainTex, _EdgeColor, edge);
+                 float4 finalColor = lerp(MainTex, _EdgeColor, edge * step(0.0001,_DissolveThreshold));
                 
                 return finalColor;
             }

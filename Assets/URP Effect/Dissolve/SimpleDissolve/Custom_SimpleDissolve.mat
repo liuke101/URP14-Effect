@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_DirectionalDissolve
-  m_Shader: {fileID: 4800000, guid: 7ed945f76592fb94c8927df5584b6464, type: 3}
+  m_Name: Custom_SimpleDissolve
+  m_Shader: {fileID: 4800000, guid: 335f021ab5cc09848b1fb56eaa488773, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -33,11 +33,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DissolveDiffuse: 1.45
-    - _DissolveThreshold: 0.51
-    - _EdgeWidth: 0.006
-    - _NoiseScale: 0.04
+    - _DissolveThreshold: 0
+    - _EdgeWidth: 0.298
     m_Colors:
-    - _EdgeColor: {r: 8, g: 0, b: 0, a: 1}
-    - _StartPoint: {r: 0.18, g: 0, b: 0, a: 0}
+    - _EdgeColor1: {r: 1, g: 0, b: 0, a: 1}
+    - _EdgeColor2: {r: 0.13859749, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

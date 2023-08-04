@@ -32,7 +32,6 @@ Shader "Custom/Dissolve/DirectionalDissolve"
         float4 _MainTex_ST;
         float _DissolveThreshold;
         float _EdgeWidth;
-        float4 _StartPoint;
         float _DissolveDiffuse;
         CBUFFER_END
 
@@ -55,7 +54,6 @@ Shader "Custom/Dissolve/DirectionalDissolve"
             float4 positionCS : SV_POSITION;
             float2 uv : TEXCOORD0;
             float3 positionOS : TEXCOORD1;
-            float3 startPosOS : TEXCOORD2;
         };
         ENDHLSL
         
@@ -65,7 +63,7 @@ Shader "Custom/Dissolve/DirectionalDissolve"
             {
                 "LightMode" = "UniversalForward"
             }
-            
+            Cull Off
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -78,8 +76,6 @@ Shader "Custom/Dissolve/DirectionalDissolve"
                 o.uv =TRANSFORM_TEX(i.uv, _MainTex);
 
                 o.positionOS = i.positionOS.xyz;
-                //转换到模型空间
-                o.startPosOS = TransformWorldToObject(_StartPoint.xyz);
                 return o;
             }
 
@@ -98,7 +94,7 @@ Shader "Custom/Dissolve/DirectionalDissolve"
                  float externalEdge = step(borderDistance, _DissolveThreshold + _EdgeWidth);;
                  float edge = externalEdge-internalEdge;
                 
-                 float4 finalColor = lerp(MainTex, _EdgeColor, edge);
+                 float4 finalColor = lerp(MainTex, _EdgeColor, edge * step(0.0001,_DissolveThreshold));
                   
                 
                 return finalColor;

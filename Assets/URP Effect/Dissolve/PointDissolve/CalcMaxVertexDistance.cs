@@ -35,8 +35,6 @@ public class CalcMaxVertexDistance : MonoBehaviour
                 }
             }
         }
-
         return maxDistance;
     }
-
 }

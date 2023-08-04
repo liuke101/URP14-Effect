@@ -10,6 +10,7 @@ Shader "Custom/Dissolve/PointDissolve"
         _EdgeWidth("EdgeWidth", Range(0,1)) = 0.022
         [HDR]_EdgeColor("EdgeColor", Color) = (1,0,0,1)
         
+         //消融开始点
         _StartPoint("DissolveStartPoint", Vector) = (0,0,0,0)
         _DissolveDiffuse("DissolveDiffuse", Range(0,10)) = 1
     }
@@ -22,7 +23,8 @@ Shader "Custom/Dissolve/PointDissolve"
             "RenderType"="TransparentCutout"
              "Queue"="AlphaTest"
         }
-    
+        
+        
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         
@@ -65,6 +67,7 @@ Shader "Custom/Dissolve/PointDissolve"
             {
                 "LightMode" = "UniversalForward"
             }
+            Cull Off
             
             HLSLPROGRAM
             #pragma vertex vert
@@ -98,9 +101,8 @@ Shader "Custom/Dissolve/PointDissolve"
                  float internalEdge = step(normalizedDistance,_DissolveThreshold);
                  float externalEdge = step(normalizedDistance, _DissolveThreshold+_EdgeWidth);;
                  float edge = externalEdge-internalEdge;
-                //return float4(edge.xxx,1);
                 
-                 float4 finalColor = lerp(MainTex, _EdgeColor, edge);
+                 float4 finalColor = lerp(MainTex, _EdgeColor, edge * step(0.0001,_DissolveThreshold));
                 
                 return finalColor;
             }
