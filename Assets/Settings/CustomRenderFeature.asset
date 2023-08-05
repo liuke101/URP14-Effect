@@ -41,12 +41,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb8ba88cea145398ef0dbdf767b3844, type: 3}
   m_Name: DepthFogRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   parameters:
-    fogDensity: 1.87
+    fogDensity: 1.32
     fogColor: {r: 1, g: 1, b: 1, a: 1}
-    fogStart: 26.5
-    fogEnd: 403.2
+    fogStart: 8.6
+    fogEnd: 325.6
   blitShader: {fileID: 4800000, guid: 02e8d3d7bf8c48fca090050cc1b09d1f, type: 3}
   settings:
     commandBufferTag: URP Post Processing
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   parameters:
-    blurTrain: 0.295
+    blurTrain: 0.359
   blitShader: {fileID: 4800000, guid: ec06578779074961b26f24ad3bb5a63d, type: 3}
   settings:
     commandBufferTag: URP Post Processing
@@ -156,9 +156,9 @@ MonoBehaviour:
   m_Name: DualBlur
   m_EditorClassIdentifier: 
   m_Active: 0
-  iterations: 0
-  blurRadius: 0
-  downSample: 1
+  iterations: 2
+  blurRadius: 3.22
+  downSample: 8
   blitShader: {fileID: 4800000, guid: 4db70ba5f463467a9a3de2ac907a5906, type: 3}
   renderPassEvent: 550
 --- !u!114 &-2823600757918437595
@@ -175,7 +175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   parameters:
-    splitIntensity: 0.567
+    splitIntensity: 0.873
     amplitude: 2.57
   blitShader: {fileID: 4800000, guid: db12413c0e76417fa7b443d284858dcd, type: 3}
   settings:
@@ -203,8 +203,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   parameters:
-    lineSpace: 0.445
-    lineWidth: 0.014
+    lineSpace: 0.289
+    lineWidth: 0.172
     lineColorX: {r: 4, g: 0, b: 0, a: 1}
     lineColorY: {r: 0, g: 1, b: 0, a: 1}
     lineColorZ: {r: 0, g: 0, b: 2, a: 1}
@@ -268,17 +268,8 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: -4725114890146028036}
-  - {fileID: -2823600757918437595}
-  - {fileID: 5134156949784718824}
-  - {fileID: -2217893829062274145}
-  - {fileID: 4518053160893676320}
-  - {fileID: -5141877460913036402}
-  - {fileID: 6917533543576648512}
-  - {fileID: -2944904899210643998}
-  - {fileID: -4913564863674632921}
-  - {fileID: 5914914864760648919}
-  m_RendererFeatureMap: fce5efc90a056dbe256fbf1c128ed0d8e86d053d8b3040479f533639507538e120fb65836959b33e8ee3b02fb161a4b8403bbc721b040060e2f53dd1989821d72735d527ca82cfbbd774bc1ebbff1552
+  - {fileID: 4594298283595443927}
+  m_RendererFeatureMap: d7aee481f239c23f
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -313,8 +304,8 @@ MonoBehaviour:
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
-  m_DepthPrimingMode: 0
-  m_CopyDepthMode: 1
+  m_DepthPrimingMode: 1
+  m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
 --- !u!114 &1325919059309863808
@@ -360,12 +351,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e877129772e45379358c29ea6e3bd38, type: 3}
   m_Name: KawaseBlur
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   iterations: 0
-  blurRadius: 0
+  blurRadius: 5
   downSample: 1
   blitShader: {fileID: 4800000, guid: 35040253c6c540269e3a2de67fe148db, type: 3}
   renderPassEvent: 550
+--- !u!114 &4594298283595443927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab6995e0329f9e438ccacc719097617, type: 3}
+  m_Name: ConfigureInputRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  grabTextureName: _GrabFullScreenTexture
+  renderPassEvent: 600
+  renderPassInput: 7
 --- !u!114 &4938605765049058561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -435,10 +442,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   parameters:
-    blockSize: 10.3
-    timeSpeed: 9.94
-    maxRGBSplitX: 0
-    maxRGBSplitY: 0
+    blockSize: 7.3
+    timeSpeed: 1.98
+    maxRGBSplitX: 21.56
+    maxRGBSplitY: 21.83
   blitShader: {fileID: 4800000, guid: e0df36591985412ca582038608aede4a, type: 3}
   settings:
     commandBufferTag: URP Post Processing
@@ -464,13 +471,13 @@ MonoBehaviour:
   m_Name: GodRay
   m_EditorClassIdentifier: 
   m_Active: 0
-  iterations: 1
-  blurRadius: 0.0032
-  downSample: 1
+  iterations: 6
+  blurRadius: 0.0409
+  downSample: 5
   radialCenter: {x: 0.5, y: 0.5}
   radialOffsetIterations: 14
-  luminanceThreshold: 0
-  bloomIntensity: 3.02
+  luminanceThreshold: 0.02
+  bloomIntensity: 3.23
   blitShader: {fileID: 4800000, guid: 74be8f5f91f745a09411a571ddb1b93c, type: 3}
   renderPassEvent: 550
 --- !u!114 &6371404345465829296
@@ -516,12 +523,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   parameters:
-    edgesOnly: 0
-    edgeColor: {r: 0, g: 0, b: 0, a: 1}
-    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-    sampleDistance: 1
-    sensitivityDepth: 1
-    sensitivityNormals: 1
+    edgesOnly: 0.87
+    edgeColor: {r: 2, g: 0, b: 0, a: 1}
+    backgroundColor: {r: 0, g: 0.14572096, b: 1, a: 1}
+    sampleDistance: 0.53
+    sensitivityDepth: 5.35
+    sensitivityNormals: 0.37
   blitShader: {fileID: 4800000, guid: 8a4e938f9cc8441dbfddd82a990af29f, type: 3}
   settings:
     commandBufferTag: URP Post Processing
