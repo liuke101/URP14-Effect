@@ -27,7 +27,7 @@
         
         float4 _BlitTexture_TexelSize;
         float _EdgesOnly;
-        float4 _EdgeColor;
+        float4 _OutlineColor;
         float4 _BackgroundColor;
         float _SampleDistance;
         float _SensitivityDepth;
@@ -127,8 +127,8 @@
                 edge *= CheckSame(sample1, sample2);
                 edge *= CheckSame(sample3, sample4);
                 
-                float4 withEdgeColor = lerp(_EdgeColor,SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, i.uv[0]),edge);
-                float4 onlyEdgeColor = lerp(_EdgeColor, _BackgroundColor, edge);
+                float4 withEdgeColor = lerp(_OutlineColor,SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, i.uv[0]),edge);
+                float4 onlyEdgeColor = lerp(_OutlineColor, _BackgroundColor, edge);
                 
                 return lerp(withEdgeColor, onlyEdgeColor, _EdgesOnly);
             }

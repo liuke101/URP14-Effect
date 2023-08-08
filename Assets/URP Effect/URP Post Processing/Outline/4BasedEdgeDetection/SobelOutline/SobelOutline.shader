@@ -25,7 +25,7 @@
         SAMPLER(sampler_BlitTexture);
         float4 _BlitTexture_TexelSize;
         float _EdgesOnly;
-        float4 _EdgeColor;
+        float4 _OutlineColor;
         float4 _BackgroundColor;
         
 
@@ -115,8 +115,8 @@
             {
                 float G = Sobel(i); //值越大，说明该像素越可能是边缘
                 float4 withEdgeColor = lerp(
-                    SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[4]), _EdgeColor, G);
-                float4 onlyEdgeColor = lerp(_BackgroundColor, _EdgeColor, G);
+                    SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[4]), _OutlineColor, G);
+                float4 onlyEdgeColor = lerp(_BackgroundColor, _OutlineColor, G);
 
                 return lerp(withEdgeColor, onlyEdgeColor, _EdgesOnly) ;
             }

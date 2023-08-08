@@ -30,7 +30,7 @@ Shader "Custom/Dissolve/PointDissolve"
         
         CBUFFER_START(UnityPerMaterial)
         float _NoiseScale;
-        float4 _EdgeColor;
+        float4 _OutlineColor;
         float4 _MainTex_ST;
         float _DissolveThreshold;
         float _EdgeWidth;
@@ -102,7 +102,7 @@ Shader "Custom/Dissolve/PointDissolve"
                  float externalEdge = step(normalizedDistance, _DissolveThreshold+_EdgeWidth);;
                  float edge = externalEdge-internalEdge;
                 
-                 float4 finalColor = lerp(MainTex, _EdgeColor, edge * step(0.0001,_DissolveThreshold));
+                 float4 finalColor = lerp(MainTex, _OutlineColor, edge * step(0.0001,_DissolveThreshold));
                 
                 return finalColor;
             }

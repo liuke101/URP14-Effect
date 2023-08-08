@@ -25,6 +25,20 @@ Shader "Custom/ToonWater"
         _RefractFactor("折射系数", Range(0, 100)) = 1
         [Normal] _NormalMap("NormalMap", 2D) = "bump" {}
         _NormalScale("NormalScale", Range(0, 10)) = 1
+        
+        
+        [Header(Reflect)]
+        _SpecularPower("SpecularPower", Range(0, 256)) = 32
+        _SpecularScale("SpecularScale", Range(0, 100)) = 1
+        _FresnelPower("FresnelPower", Range(0, 32)) = 5
+        _FresnelScale("FresnelScale", Range(0, 10)) = 1
+        _CubeMap("CubeMap", CUBE) = "white" {}
+        _ReflectNormalLerp("ReflectNormalLerp", Range(0, 1)) = 0.05
+    
+        [Header(caustic)]
+        _CausticTex("CausticTex", 2D) = "white" {}
+        
+        
     }
 
     HLSLINCLUDE
@@ -39,19 +53,26 @@ Shader "Custom/ToonWater"
     float4 _DepthColor;
     float4 _ShallowColor;
 
-    float _NormalMap_ST;
+    float4 _NormalMap_ST;
     float4 _SurfaceNoise_ST;
     float _SurfaceNoiseCutoff;
     float _FoamMaxDistance;
     float _FoamMinDistance;
     float _FoamEdgeFade;
     float2 _TimeSpeed;
+    
 
     float _FlowSpeed;
 
-    
+
     float _RefractFactor;
-    
+    float _SpecularPower;
+    float _SpecularScale;
+    float _FresnelPower;
+    float _FresnelScale;
+    float _ReflectNormalLerp;
+    float4 _CausticTex_ST;
+
     CBUFFER_END
 
     TEXTURE2D(_NormalMap);
@@ -60,13 +81,14 @@ Shader "Custom/ToonWater"
     SAMPLER(sampler_SurfaceNoise);
     TEXTURE2D(_FlowMap);
     SAMPLER(sampler_FlowMap);
-    TEXTURE2D(_GrabFullScreenTexture);
-    SAMPLER(sampler_GrabFullScreenTexture);
-    float4 _GrabFullScreenTexture_TexelSize;
-    
+    TEXTURE2D(_CausticTex);
+    SAMPLER(sampler_CausticTex);
     TEXTURE2D(_CameraOpaqueTexture);
     SAMPLER(sampler_CameraOpaqueTexture);
+    TEXTURECUBE(_CubeMap);
+    SAMPLER(sampler_CubeMap);
     float4 _CameraOpaqueTexture_TexelSize;
+    SAMPLER(sampler_unity_SpecCube0);
 
 
     struct Attributes
@@ -138,7 +160,7 @@ Shader "Custom/ToonWater"
                 o.viewDirWS = GetWorldSpaceNormalizeViewDir(o.positionWS);
 
                 //扰动UV
-                o.normalUV = TRANSFORM_TEX(float2(i.uv + _TimeSpeed*_Time.y), _SurfaceNoise);
+                o.normalUV = TRANSFORM_TEX(float2(i.uv + _TimeSpeed*_Time.y), _NormalMap);
                 o.noiseUV = TRANSFORM_TEX(float2(i.uv + _TimeSpeed*_Time.y), _SurfaceNoise);
                 return o;
             }
@@ -154,12 +176,11 @@ Shader "Custom/ToonWater"
 
                 //法线贴图扰动屏幕UV
                 float3 normalMap = UnpackNormalScale(
-                SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, i.normalUV), _NormalScale);
+                    SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, i.normalUV), _NormalScale);
                 float3x3 TBN = CreateTangentToWorld(i.normalWS, i.tangentWS.xyz, i.tangentWS.w);
                 float3 N = TransformTangentToWorld(normalMap, TBN, true);
                 float2 bias = N.xy * _CameraOpaqueTexture_TexelSize.xy * _RefractFactor;
                 float2 ScreenUVRefract = ScreenUV + bias;
-
 
                 //--------------------------------------------
                 // 基于深度着色
@@ -171,7 +192,7 @@ Shader "Custom/ToonWater"
                 #else
                 float opaqueDepth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(ScreenUV)); 
                 #endif
-                float opaqueDepthVS = LinearEyeDepth(opaqueDepth, _ZBufferParams); 
+                float opaqueDepthVS = LinearEyeDepth(opaqueDepth, _ZBufferParams);
 
                 //被扰动的
                 #if UNITY_REVERSED_Z
@@ -180,29 +201,29 @@ Shader "Custom/ToonWater"
                 float opaqueDepthRefract = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(ScreenUVRefract)); 
                 #endif
                 float opaqueDepthRefractVS = LinearEyeDepth(opaqueDepthRefract, _ZBufferParams); //线性
-                
+
                 //2 水面的观察空间深度
                 float waterSurfaceDepth = i.positionCS.w; //或= -i.positionVS.z
                 //3 计算水深
                 float waterDepth = opaqueDepthVS - waterSurfaceDepth;
                 float waterDepthRefract = opaqueDepthRefractVS - waterSurfaceDepth;
-                
+
                 //4 除以最大水深，归一化深度
                 float waterDepthNormalize = saturate(waterDepthRefract / _MaxDepth);
                 //5 插值深度着色
                 float4 waterColor = lerp(_ShallowColor, _DepthColor, waterDepthNormalize);
 
                 //--------------------------------------------
-                // 判断水上水下，水上用屏幕UV，水下用扭曲UV，来采样抓屏纹理
+                // 判断水上水下，水上用屏幕UV，水下用扭曲UV，来采样不透明纹理
                 //--------------------------------------------
                 if (waterDepth < 0)
                 {
                     ScreenUVRefract = ScreenUV;
                 }
                 float4 OpaqueTexture = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture,ScreenUVRefract);
-                
+
                 //--------------------------------------------
-                // 泡沫
+                // 泡沫(采用未扰动的UV和深度)
                 //--------------------------------------------
                 //FlowMap来处理噪声贴图
                 float3 flowDir = SAMPLE_TEXTURE2D(_FlowMap, sampler_FlowMap, i.uv).rgb * 2.0 - 1.0;
@@ -214,19 +235,51 @@ Shader "Custom/ToonWater"
                 float NoiseFlowTex = lerp(tex0, tex1, abs((0.5 - phase0) / 0.5));
 
                 //泡沫深度
-                //TODO:水下泡沫问题
-                    float3 NormalsTexture = SampleSceneNormals(ScreenUVRefract); //法线纹理
-                    float normalDot = saturate(dot(NormalsTexture, i.normalVS)); //法线纹理点积观察空间法线
-                    float foamDistance = lerp(_FoamMaxDistance, _FoamMinDistance, normalDot);
-                    float foamDepthDifference = saturate(waterDepth / foamDistance);
-                    //越深裁剪值越大
-                    float FoamNoiseCutoff = foamDepthDifference * _SurfaceNoiseCutoff;
-                    //抗锯齿：平滑过渡
-                    float FoamNoise = smoothstep(FoamNoiseCutoff - _FoamEdgeFade, FoamNoiseCutoff + _FoamEdgeFade, NoiseFlowTex);
+                float3 NormalsTexture = normalize(SampleSceneNormals(ScreenUV));
 
+                float normalDot = saturate(dot(NormalsTexture, i.normalVS)); //法线纹理点积观察空间法线
 
+                float foamDistance = lerp(_FoamMaxDistance, _FoamMinDistance, normalDot);
+                float foamDepthDifference = saturate(waterDepth / foamDistance);
+
+                //越深裁剪值越大
+                float FoamNoiseCutoff = foamDepthDifference * _SurfaceNoiseCutoff;
+                //抗锯齿：平滑过渡
+                float FoamNoise = smoothstep(FoamNoiseCutoff - _FoamEdgeFade, FoamNoiseCutoff + _FoamEdgeFade,
+                NoiseFlowTex);
+
+                //--------------------------------------------
+                // 反射
+                //--------------------------------------------
+                //高光反射
+                //向量计算
+                float3 L = normalize(_MainLightPosition.xyz);
+                float3 V = normalize(i.viewDirWS);
+                float3 H = normalize(L + V);
+                float3 ReflectN= lerp(i.normalWS, N, _ReflectNormalLerp);
+                float NdotH = dot(N, H);
+                float3 specular = pow(max(0, NdotH), _SpecularPower) * _SpecularScale  * _MainLightColor.rgb;
+                
+                //Fresnel
+                float fresnel = pow(1 - saturate(dot(i.normalWS, V)), _FresnelPower) * _FresnelScale;
+
+                //环境反射
+                //CubeMap
+                float3 R = normalize(reflect(-V, ReflectN)); 
+                float4 cubeMap = SAMPLE_TEXTURECUBE(_CubeMap,sampler_CubeMap, R); 
+                float3 cubeMapcolor = DecodeHDREnvironment(cubeMap, unity_SpecCube0_HDR);
+                //实时环境反射：反射探针
+                // float4 environment = SAMPLE_TEXTURECUBE(unity_SpecCube0,sampler_unity_SpecCube0, R); 
+                // float3 envcolor = DecodeHDREnvironment(environment, unity_SpecCube0_HDR); 
+                
+                
+                //--------------------------------------------
+                // 焦散(深度重建世界坐标xz分量采样焦散贴图)
+                //--------------------------------------------
+                 // float3 rebuildPosWS = ComputeWorldSpacePosition(ScreenUV, opaqueDepthRefract, UNITY_MATRIX_I_VP);
+                 // float4 CausticTex = SAMPLE_TEXTURE2D(_CausticTex, sampler_CausticTex, float2((rebuildPosWS.xz + _TimeSpeed * _Time.y) * _CausticTex_ST.xy +_CausticTex_ST.zw))*waterDepth;
                 //卡通水
-                float4 finalColor = waterColor * OpaqueTexture + FoamNoise;
+                float4 finalColor = waterColor * OpaqueTexture + FoamNoise+float4(cubeMapcolor+specular+fresnel,1);
 
                 return finalColor;
             }

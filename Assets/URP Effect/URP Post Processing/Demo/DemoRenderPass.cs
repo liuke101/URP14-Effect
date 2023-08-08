@@ -12,6 +12,7 @@ public class DemoRenderPass : ScriptableRenderPass
     private Material m_blitMaterial;
     private float m_intensity;
     
+    
     //CPU和GPU分析采样器的包装器。将此与ProfileScope一起使用可以评测一段代码。
     //标记Profiling后，可在FrameDebugger中直接查看标记Profiling的对象
     private ProfilingSampler m_profilingSampler = new ProfilingSampler("DemoRenderPass");

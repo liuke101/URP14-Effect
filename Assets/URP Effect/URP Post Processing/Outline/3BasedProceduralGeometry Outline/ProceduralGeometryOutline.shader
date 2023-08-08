@@ -22,8 +22,8 @@ Shader "Custom/ProceduralGeometryOutline"
 
         CBUFFER_START(UnityPerMaterial)
         float4 _MainTex_ST;
-        float4 _EdgeColor;
-        float _EdgeScale;
+        float4 _OutlineColor;
+        float _OutlineWidth;
         float _OutlineSpace;
         float _NormalZ;
         CBUFFER_END
@@ -63,7 +63,7 @@ Shader "Custom/ProceduralGeometryOutline"
                 Varyings o = (Varyings)0;
                 o.uv = TRANSFORM_TEX(i.uv, _MainTex);
                 i.normalOS.z =_NormalZ;
-                i.positionOS.xyz += normalize(i.normalOS) * _EdgeScale;
+                i.positionOS.xyz += normalize(i.normalOS) * _OutlineWidth;
                 o.positionCS = TransformObjectToHClip(i.positionOS.xyz);
             
                 return o;
@@ -71,7 +71,7 @@ Shader "Custom/ProceduralGeometryOutline"
 
             float4 frag(Varyings i) : SV_Target
             {
-                return _EdgeColor;
+                return _OutlineColor;
             }
             ENDHLSL
         }

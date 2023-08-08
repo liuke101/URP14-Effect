@@ -304,7 +304,7 @@ MonoBehaviour:
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
-  m_DepthPrimingMode: 1
+  m_DepthPrimingMode: 0
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
@@ -370,8 +370,9 @@ MonoBehaviour:
   m_Name: ConfigureInputRenderFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  grabTextureName: _GrabFullScreenTexture
-  renderPassEvent: 600
+  grabFullScreenTexture: 0
+  grabFullScreenTextureName: _GrabFullScreenTexture
+  renderPassEvent: 550
   renderPassInput: 7
 --- !u!114 &4938605765049058561
 MonoBehaviour:

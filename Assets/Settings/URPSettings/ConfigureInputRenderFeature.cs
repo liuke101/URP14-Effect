@@ -12,14 +12,16 @@ public class ConfigureInputRenderFeature : ScriptableRendererFeature
         private RenderTextureDescriptor m_rtDescriptor;
         private ProfilingSampler m_profilingSampler = new ProfilingSampler("Configure Input");
         private string m_grabTextureName;
+        private bool m_isGrab;
         
         //------------------------------------------------------
         // //设置RenderPass参数
         //------------------------------------------------------
-        public void SetRenderPass(RTHandle cameraColorTargetHandle,string grabTextureName)
+        public void SetRenderPass(RTHandle cameraColorTargetHandle,string grabTextureName,bool isGrab)
         {
             m_cameraColorRT = cameraColorTargetHandle;
             m_grabTextureName = grabTextureName;
+            m_isGrab = isGrab;
         }
         
         
@@ -44,10 +46,13 @@ public class ConfigureInputRenderFeature : ScriptableRendererFeature
             //ProfilingScope
             using (new ProfilingScope(cmd, m_profilingSampler))
             {
-                RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
-                Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0); 
-                cmd.SetGlobalTexture(m_grabTextureName, m_tempRT0); 
-                Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT); 
+                if (m_isGrab)
+                {
+                    RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
+                    Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0);
+                    cmd.SetGlobalTexture(m_grabTextureName, m_tempRT0);
+                    Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT);
+                }
             }
         
             //执行命令缓冲区中的命令
@@ -63,7 +68,8 @@ public class ConfigureInputRenderFeature : ScriptableRendererFeature
         }
     }
 
-    public string  grabTextureName = "_GrabFullScreenTexture";
+    public bool grabFullScreenTexture = false;
+    public string  grabFullScreenTextureName = "_GrabFullScreenTexture";
     public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
     private CustomRenderPass m_scriptablePass;
     public ScriptableRenderPassInput renderPassInput  = ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth| ScriptableRenderPassInput.Normal;
@@ -79,7 +85,7 @@ public class ConfigureInputRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             m_scriptablePass.renderPassEvent = renderPassEvent;
-            m_scriptablePass.SetRenderPass(renderer.cameraColorTargetHandle,grabTextureName);
+            m_scriptablePass.SetRenderPass(renderer.cameraColorTargetHandle,grabFullScreenTextureName,grabFullScreenTexture);
             // RenderPass配置输入
             // Color: CopyColor & _CameraOpaqueTexture
             // Depth: DepthPrePass & _CameraDepthTexture
