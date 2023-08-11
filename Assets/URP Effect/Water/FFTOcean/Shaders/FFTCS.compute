@@ -101,13 +101,13 @@ void CreateDisplaceSpectrum(uint3 id: SV_DispatchThreadID)
 void FFTHorizontal(uint3 id: SV_DispatchThreadID)
 {
     //Stockham 算法
-    int2 idxs = id.xy;
-    idxs.x = floor(id.x / (Ns * 2.0f)) * Ns + id.x % Ns;
+    int2 index = id.xy;
+    index.x = floor(id.x / (Ns * 2.0f)) * Ns + id.x % Ns;
     float angle = 2.0f * PI * (id.x / (Ns * 2.0f));
     float2 w = float2(cos(angle), sin(angle));
 
-    float2 x0 = InputRT[idxs].xy;
-    float2 x1 = InputRT[int2(idxs.x + N * 0.5f, idxs.y)].xy;
+    float2 x0 = InputRT[index].xy;
+    float2 x1 = InputRT[int2(index.x + N * 0.5f, index.y)].xy;
 
     float2 output = x0 + float2(w.x * x1.x - w.y * x1.y, w.x * x1.y + w.y * x1.x);
     OutputRT[id.xy] = float4(output, 0, 0);
@@ -117,8 +117,8 @@ void FFTHorizontal(uint3 id: SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void FFTHorizontalEnd(uint3 id: SV_DispatchThreadID)
 {
-    int2 idxs = id.xy;
-    idxs.x = floor(id.x / (Ns * 2.0f)) * Ns + id.x % Ns;
+    int2 index = id.xy;
+    index.x = floor(id.x / (Ns * 2.0f)) * Ns + id.x % Ns;
     float angle = 2.0f * PI * (id.x / (Ns * 2.0f));
     float2 w = float2(cos(angle), sin(angle));
 
@@ -126,8 +126,8 @@ void FFTHorizontalEnd(uint3 id: SV_DispatchThreadID)
     w *= -1;
     /***************************/
 
-    float2 x0 = InputRT[idxs].xy;
-    float2 x1 = InputRT[int2(idxs.x + N * 0.5f, idxs.y)].xy;
+    float2 x0 = InputRT[index].xy;
+    float2 x1 = InputRT[int2(index.x + N * 0.5f, index.y)].xy;
 
     float2 output = x0 + float2(w.x * x1.x - w.y * x1.y, w.x * x1.y + w.y * x1.x);
     /*********修改内容***********/
@@ -141,13 +141,13 @@ void FFTHorizontalEnd(uint3 id: SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void FFTVertical(uint3 id: SV_DispatchThreadID)
 {
-    int2 idxs = id.xy;
-    idxs.y = floor(id.y / (Ns * 2.0f)) * Ns + id.y % Ns;
+    int2 index = id.xy;
+    index.y = floor(id.y / (Ns * 2.0f)) * Ns + id.y % Ns;
     float angle = 2.0f * PI * (id.y / (Ns * 2.0f));
     float2 w = float2(cos(angle), sin(angle));
 
-    float2 x0 = InputRT[idxs].xy;
-    float2 x1 = InputRT[int2(idxs.x, idxs.y + N * 0.5f)].xy;
+    float2 x0 = InputRT[index].xy;
+    float2 x1 = InputRT[int2(index.x, index.y + N * 0.5f)].xy;
 
     float2 output = x0 + float2(w.x * x1.x - w.y * x1.y, w.x * x1.y + w.y * x1.x);
     OutputRT[id.xy] = float4(output, 0, 0);
@@ -156,8 +156,8 @@ void FFTVertical(uint3 id: SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void FFTVerticalEnd(uint3 id: SV_DispatchThreadID)
 {
-    int2 idxs = id.xy;
-    idxs.y = floor(id.y / (Ns * 2.0f)) * Ns + id.y % Ns;
+    int2 index = id.xy;
+    index.y = floor(id.y / (Ns * 2.0f)) * Ns + id.y % Ns;
     float angle = 2.0f * PI * (id.y / (Ns * 2.0f));
     float2 w = float2(cos(angle), sin(angle));
 
@@ -165,8 +165,8 @@ void FFTVerticalEnd(uint3 id: SV_DispatchThreadID)
     w *= -1;
     /***************************/
 
-    float2 x0 = InputRT[idxs].xy;
-    float2 x1 = InputRT[int2(idxs.x, idxs.y + N * 0.5f)].xy;
+    float2 x0 = InputRT[index].xy;
+    float2 x1 = InputRT[int2(index.x, index.y + N * 0.5f)].xy;
 
     float2 output = x0 + float2(w.x * x1.x - w.y * x1.y, w.x * x1.y + w.y * x1.x);
     /*********修改内容***********/

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class FFTOcean : MonoBehaviour
+public class FFTOceanMesh : MonoBehaviour
 {
 
     [Range(3, 14)]
@@ -34,12 +34,6 @@ public class FFTOcean : MonoBehaviour
     private int m_fftSize;			//fft纹理大小 = pow(2,FFTPow)
     private float m_time = 0;         //时间
 
-    private int[] m_vertIndexes;		//网格三角形索引
-    private Vector3[] m_positions;    //位置
-    private Vector2[] m_uvs; 			//uv坐标
-    private Mesh m_mesh;
-    private MeshFilter m_filter;
-    private MeshRenderer m_render;
 
     //KernelIndex
     private int m_computeGaussianRandomKernelIndex;            //计算高斯随机数
@@ -64,26 +58,10 @@ public class FFTOcean : MonoBehaviour
 
     private void Awake()
     {
-        //添加网格及渲染组件
-        m_filter = gameObject.GetComponent<MeshFilter>();
-        if (m_filter == null)
-        {
-            m_filter = gameObject.AddComponent<MeshFilter>();
-        }
-        m_render = gameObject.GetComponent<MeshRenderer>();
-        if (m_render == null)
-        {
-            m_render = gameObject.AddComponent<MeshRenderer>();
-        }
-        m_mesh = new Mesh();
-        m_filter.mesh = m_mesh;
-        m_render.material = oceanMaterial;
     }
 
     private void Start()
     {
-        //程序化创建网格
-        CreateMesh();
         //初始化ComputerShader相关数据
         InitializeComputeShader();
     }
@@ -94,41 +72,6 @@ public class FFTOcean : MonoBehaviour
         ComputeOceanValue();
     }
 
-
-    /// <summary>
-    /// 程序化创建网格
-    /// </summary>
-    private void CreateMesh()
-    {
-        m_vertIndexes = new int[(meshSize - 1) * (meshSize - 1) * 6];
-        m_positions = new Vector3[meshSize * meshSize];
-        m_uvs = new Vector2[meshSize * meshSize];
-
-        int inx = 0;
-        for (int i = 0; i < meshSize; i++)
-        {
-            for (int j = 0; j < meshSize; j++)
-            {
-                int index = i * meshSize + j;
-                m_positions[index] = new Vector3((j - meshSize / 2.0f) * meshLength / meshSize, 0, (i - meshSize / 2.0f) * meshLength / meshSize);
-                m_uvs[index] = new Vector2(j / (meshSize - 1.0f), i / (meshSize - 1.0f));
-
-                if (i != meshSize - 1 && j != meshSize - 1)
-                {
-                    m_vertIndexes[inx++] = index;
-                    m_vertIndexes[inx++] = index + meshSize;
-                    m_vertIndexes[inx++] = index + meshSize + 1;
-
-                    m_vertIndexes[inx++] = index;
-                    m_vertIndexes[inx++] = index + meshSize + 1;
-                    m_vertIndexes[inx++] = index + 1;
-                }
-            }
-        }
-        m_mesh.vertices = m_positions;
-        m_mesh.SetIndices(m_vertIndexes, MeshTopology.Triangles, 0);
-        m_mesh.uv = m_uvs;
-    }
     
     /// <summary>
     /// 初始化Computer Shader相关数据

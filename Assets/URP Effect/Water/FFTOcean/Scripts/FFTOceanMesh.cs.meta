@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: c2f94bc2c56738e4ea0a20bd6023db1b
+guid: 523fa66e1dae4506a0c874b9d24082ed
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
   - computeShader: {fileID: 7200000, guid: cbb70584572cf9b43b5af6ba46995de6, type: 3}
-  - oceanMaterial: {fileID: 2100000, guid: b6f6d834aef575a48badaaf4ab07de08, type: 2}
+  - oceanMaterial: {fileID: 2100000, guid: 0c07d6736b7e562449783957fbb20213, type: 2}
   - displaceXMat: {fileID: 2100000, guid: 9f689d67aae03ac409be1ee6d927f0c4, type: 2}
   - displaceYMat: {fileID: 2100000, guid: feddd77729d6a994f82b3c5f9e86893b, type: 2}
   - displaceZMat: {fileID: 2100000, guid: c34e5819af438e748866d087d767df97, type: 2}

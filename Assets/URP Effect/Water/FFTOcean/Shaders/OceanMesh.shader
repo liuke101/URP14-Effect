@@ -1,4 +1,4 @@
-﻿Shader "Scarecrow/Ocean"
+﻿Shader "Scarecrow/OceanMesh"
 {
     Properties
     {
