@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ToonWater
+  m_Shader: {fileID: 4800000, guid: 89ef518a0ab1ac94d99524903493ad1d, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CausticTex:
+        m_Texture: {fileID: 2800000, guid: b1d509793703f7e428b39bfc62d6c223, type: 3}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 0, y: 0}
+    - _CubeMap:
+        m_Texture: {fileID: 8900000, guid: d8b9a114dc91e7d4e9885d54ca9d957f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FlowMap:
+        m_Texture: {fileID: 2800000, guid: 3dcbd5cbad86dbb4caa3d3551404d679, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 6ec37cd6b4da60b42bd1a9e888526e73, type: 3}
+        m_Scale: {x: 5, y: 5}
+        m_Offset: {x: 0, y: 0}
+    - _SurfaceNoise:
+        m_Texture: {fileID: 2800000, guid: 47618dc679396ef4fbf8a92dc75eab6f, type: 3}
+        m_Scale: {x: 10, y: 20}
+        m_Offset: {x: 0.01, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthDifference: 1.2
+    - _DepthMaxDistance: 1.3
+    - _FlowSpeed: 2.55
+    - _FoamDistance: -13.16
+    - _FoamEdgeFade: 0.03
+    - _FoamMaxDistance: 0.59
+    - _FoamMinDistance: 0.45
+    - _FresnelPower: 15.6
+    - _FresnelScale: 1
+    - _MaxDepth: 5
+    - _NormalScale: 4.02
+    - _ReflectNormalLerp: 0.04
+    - _RefractFactor: 20.8
+    - _SpecularExp: 32
+    - _SpecularPower: 256
+    - _SpecularScale: 25.5
+    - _SpecularStrength: 1
+    - _SurfaceNoiseCutoff: 0.704
+    - _WaterHeight: 1.61
+    m_Colors:
+    - _BaseColor: {r: 1, g: 0, b: 0, a: 1}
+    - _DepthColor: {r: 0, g: 3.0441587, b: 18.164824, a: 1}
+    - _ShallowColor: {r: 0, g: 5.6597486, b: 4.54464, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SurfaceNoiseScroll: {r: 0, g: 0, b: 0, a: 0}
+    - _SurfaceNoiseScrool: {r: 0.01, g: 0.01, b: 0, a: 0}
+    - _TimeSpeed: {r: 0.005, g: 0.005, b: 0, a: 1}
+    - _WaterColor: {r: 0, g: 0.43137264, b: 1, a: 0.13333334}
+  m_BuildTextureStacks: []

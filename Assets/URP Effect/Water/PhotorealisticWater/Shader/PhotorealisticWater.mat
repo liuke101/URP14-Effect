@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PhotorealisticWater
+  m_Shader: {fileID: 4800000, guid: 8e752124fdfb3074a844246f9449f878, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _FACTORTYPE_VIEW
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CausticTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 0, y: 0}
+    - _CubeMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FFTBubbles:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FFTDisplace:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FFTNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FlowMap:
+        m_Texture: {fileID: 2800000, guid: 3dcbd5cbad86dbb4caa3d3551404d679, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 6ec37cd6b4da60b42bd1a9e888526e73, type: 3}
+        m_Scale: {x: 5, y: 5}
+        m_Offset: {x: 0, y: 0}
+    - _SurfaceNoise:
+        m_Texture: {fileID: 2800000, guid: 47618dc679396ef4fbf8a92dc75eab6f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BlendOp: 0
+    - _CullMode: 0
+    - _DstBlend: 10
+    - _EdgeFactor: 10
+    - _FactorType: 1
+    - _FlowSpeed: 0.64
+    - _FoamEdgeFade: 0.675
+    - _FoamMaxDistance: 6.75
+    - _FoamMinDistance: 6.38
+    - _FresnelPower: 10.5
+    - _FresnelScale: 1
+    - _InsideFactor: 10
+    - _MaxDepth: 56
+    - _NormalScale: 1.58
+    - _ReflectNormalLerp: 0.012
+    - _RefractFactor: 18.9
+    - _SpecularPower: 256
+    - _SpecularScale: 4.8
+    - _SrcBlend: 5
+    - _SurfaceNoiseCutoff: 1
+    - _TessFactor: 826
+    - _TessFadeDist: 719
+    - _TessMinDist: 0.1
+    - _ZWriteMode: 0
+    m_Colors:
+    - _DepthColor: {r: 0, g: 1.0746311, b: 7.0777593, a: 1}
+    - _ShallowColor: {r: 0, g: 2.0583863, b: 3.240051, a: 1}
+    - _TimeSpeed: {r: 0.01, g: 0.01, b: 0, a: 1}
+  m_BuildTextureStacks: []

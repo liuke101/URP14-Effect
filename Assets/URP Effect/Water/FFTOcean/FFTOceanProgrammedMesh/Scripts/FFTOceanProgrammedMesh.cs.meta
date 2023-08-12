@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: d2617f3f081c0634db41b4954e0aaa6b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - computeShader: {fileID: 7200000, guid: cfc2dca705513294ba67988022f9179a, type: 3}
+  - oceanMaterial: {fileID: 2100000, guid: 07aa8ed98a60d864b8a795e1ad6f7ebf, type: 2}
+  - displaceXMat: {fileID: 2100000, guid: 9f689d67aae03ac409be1ee6d927f0c4, type: 2}
+  - displaceYMat: {fileID: 2100000, guid: feddd77729d6a994f82b3c5f9e86893b, type: 2}
+  - displaceZMat: {fileID: 2100000, guid: c34e5819af438e748866d087d767df97, type: 2}
+  - displaceMat: {fileID: 2100000, guid: a56e20392109f414da7c7f68d687e049, type: 2}
+  - normalMat: {fileID: 2100000, guid: 77753d551fa3a2e45bc8c38286a7a964, type: 2}
+  - bubblesMat: {fileID: 2100000, guid: 86e7424bb1b596a479ad09fb8f351466, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
