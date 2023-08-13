@@ -1,4 +1,4 @@
-﻿Shader "URPPostProcessing/Bloom/GaussianBloom"
+﻿Shader "Water/GaussianLuminance"
 {
     Properties {}
 
@@ -19,14 +19,13 @@
         CBUFFER_START(UnityPerMaterial)
 
         CBUFFER_END
-
+        TEXTURE2D(_CameraOpaqueTexture);
+        SAMPLER(sampler_CameraOpaqueTexture);
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
-        TEXTURE2D(_SceneColor);
-        SAMPLER(sampler_SceneColor);
-        TEXTURE2D(_BloomTexture); //Bloom纹理
-        SAMPLER(sampler_BloomTexture);
-        float _BloomIntensity; //Bloom强度
+        TEXTURE2D(_LightDarkTexture); //明暗度纹理
+        SAMPLER(sampler_LightDarkTexture);
+        float _LightDarkIntensity; //明暗强度
         float _LuminanceThreshold; //亮度阈值
         float _BlurOffset;
         float4 _BlitTexture_TexelSize;
@@ -75,14 +74,14 @@
 
             float4 frag(Varyings i) : SV_Target
             {
-                float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[0]);
+                float4 color = SAMPLE_TEXTURE2D_X(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, i.uv[0]);
 
                 // 调用luminance得到采样后像素的亮度值，再减去阈值
                 // 使用clamp函数将结果截取在[0,1]范围内
                 float luminanceValue = clamp(luminance(color) - _LuminanceThreshold, 0.0, 1.0);
 
                 // 与原贴图采样得到的像素值相乘，得到提取后的亮部区域
-                return color * luminanceValue;
+                return luminanceValue;
             }
             ENDHLSL
         }
@@ -168,7 +167,7 @@
                 sum += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[3]) * 0.0545;
                 sum += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv[4]) * 0.0545;
 
-                return sum;
+                return sum * _LightDarkIntensity;  
             }
             ENDHLSL
         }
@@ -198,11 +197,9 @@
 
             float4 frag(Varyings i) : SV_Target
             {
-                float4 scenecolor = SAMPLE_TEXTURE2D(_SceneColor, sampler_SceneColor, i.uv[0]);
-                float4 bloom = SAMPLE_TEXTURE2D(_BloomTexture, sampler_BloomTexture, i.uv[0]);
+                float4 LightDarkTex = SAMPLE_TEXTURE2D(_LightDarkTexture, sampler_LightDarkTexture, i.uv[0]);
 
-                //与bloom颜色混合
-                return scenecolor + bloom * _BloomIntensity;
+                return LightDarkTex * _LightDarkIntensity;
             }
             ENDHLSL
         }

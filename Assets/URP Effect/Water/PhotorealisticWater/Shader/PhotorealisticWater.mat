@@ -48,6 +48,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3dcbd5cbad86dbb4caa3d3551404d679, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _LightDarkTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 2800000, guid: 6ec37cd6b4da60b42bd1a9e888526e73, type: 3}
         m_Scale: {x: 5, y: 5}
@@ -58,32 +62,33 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AngleDiffusion: 5.2
     - _BlendOp: 0
     - _CullMode: 0
     - _DstBlend: 10
-    - _EdgeFactor: 10
+    - _EdgeFactor: 1
     - _FactorType: 1
     - _FlowSpeed: 0.64
     - _FoamEdgeFade: 0.675
     - _FoamMaxDistance: 6.75
     - _FoamMinDistance: 6.38
-    - _FresnelPower: 10.5
-    - _FresnelScale: 1
-    - _InsideFactor: 10
-    - _MaxDepth: 56
-    - _NormalScale: 1.58
+    - _FresnelPower: 5
+    - _FresnelScale: 0.81
+    - _InsideFactor: 1
+    - _MaxDepth: 8
+    - _NormalScale: 3.63
     - _ReflectNormalLerp: 0.012
-    - _RefractFactor: 18.9
+    - _RefractFactor: 37.7
     - _SpecularPower: 256
-    - _SpecularScale: 4.8
+    - _SpecularScale: 22.6
     - _SrcBlend: 5
     - _SurfaceNoiseCutoff: 1
-    - _TessFactor: 826
-    - _TessFadeDist: 719
+    - _TessFactor: 561
+    - _TessFadeDist: 1000
     - _TessMinDist: 0.1
     - _ZWriteMode: 0
     m_Colors:
-    - _DepthColor: {r: 0, g: 1.0746311, b: 7.0777593, a: 1}
-    - _ShallowColor: {r: 0, g: 2.0583863, b: 3.240051, a: 1}
+    - _DepthColor: {r: 0.22696391, g: 0.3679245, b: 0.3679245, a: 0}
+    - _ShallowColor: {r: 0.47843137, g: 0.8, b: 0.8, a: 0}
     - _TimeSpeed: {r: 0.01, g: 0.01, b: 0, a: 1}
   m_BuildTextureStacks: []

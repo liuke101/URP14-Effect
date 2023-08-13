@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8003937570536922592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24b2a8acdcde44e49b82816be4deca21, type: 3}
+  m_Name: LuminanceTextureRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  parameters:
+    iterations: 3
+    blurRadius: 5
+    downSample: 1
+    luminanceThreshold: 0.51
+    LightDarkIntensity: 1.06
+    waterMaterial: {fileID: 2100000, guid: 90ba02d1764c93a46b3281bfef4cbcf1, type: 2}
+  blitShader: {fileID: 4800000, guid: 856cf305d16644aaaded5c06c2a6428d, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: LuminanceTexture Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 1
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
 --- !u!114 &-6595033744340642281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,7 +301,8 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: 4594298283595443927}
-  m_RendererFeatureMap: d7aee481f239c23f
+  - {fileID: -8003937570536922592}
+  m_RendererFeatureMap: d7aee481f239c23f2062beaf2f4dec90
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
