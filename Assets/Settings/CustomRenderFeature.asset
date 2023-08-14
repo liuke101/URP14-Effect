@@ -27,7 +27,7 @@ MonoBehaviour:
     renderPassEvent: 550
     renderPassInput: 5
     filterSettings:
-      renderQueueType: 1
+      renderQueueType: 0
       layerMask:
         serializedVersion: 2
         m_Bits: 0
@@ -302,7 +302,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 4594298283595443927}
   - {fileID: -8003937570536922592}
-  m_RendererFeatureMap: d7aee481f239c23f2062beaf2f4dec90
+  - {fileID: 3183604337502969814}
+  m_RendererFeatureMap: d7aee481f239c23f2062beaf2f4dec90d6df410a476f2e2c
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -364,6 +365,35 @@ MonoBehaviour:
   settings:
     commandBufferTag: URP Post Processing
     profilerTag: ScanLine Pass
+    renderPassEvent: 550
+    renderPassInput: 5
+    filterSettings:
+      renderQueueType: 0
+      layerMask:
+        serializedVersion: 2
+        m_Bits: 0
+      lightModeTags: []
+--- !u!114 &3183604337502969814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 154331a3baac4bc499e484294a7544c6, type: 3}
+  m_Name: ScreenSpaceReflectRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  parameters:
+    iterations: 1
+    blurRadius: 0
+    downSample: 2
+  blitShader: {fileID: 4800000, guid: 6d21fab8f8f647d487d99ed07feba3e5, type: 3}
+  settings:
+    commandBufferTag: URP Post Processing
+    profilerTag: ScreenSpaceReflect Pass
     renderPassEvent: 550
     renderPassInput: 5
     filterSettings:

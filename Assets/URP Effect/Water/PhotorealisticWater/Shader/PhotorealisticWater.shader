@@ -2,41 +2,41 @@ Shader "Water/PhotorealisticWater"
 {
     Properties
     {
-        [Header(Depth)][Space]
+        [Header(Depth_______________________)][Space]
         [Space]
         _MaxDepth("最大深度", Range(0, 1000)) = 10
         [HDR]_DepthColor("深水区颜色", Color) = (0,0,1,1)
         [HDR]_ShallowColor("浅水区颜色", Color) = (0,1,1,1)
         
-        [Header(FFT)][Space]
+        [Header(FFT_______________________)][Space]
         _FFTDisplace ("FFT偏移纹理", 2D) = "black" { }
         _FFTNormal ("FFT法线纹理", 2D) = "black" { }
         _FFTBubbles ("FFT泡沫纹理", 2D) = "black" { }
         
-        [Header(LightDark)][Space]
+        [Header(LightDark_______________________)][Space]
         _LightDarkTexture("明暗度贴图", 2D) = "white" {}
         
-        [Header(Foam)][Space]
+        [Header(Foam_______________________)][Space]
         _SurfaceNoise("水面噪声贴图", 2D) = "white" {}
         _SurfaceNoiseCutoff("噪声贴图裁切", Range(0, 1)) = 0.777
         _FoamMaxDistance("Foam Maximum Distance", Range(0,10)) = 0.4
         _FoamMinDistance("Foam Minimum Distance", Range(0,10)) = 0.04
         _FoamEdgeFade("Foam Edge Fade", Range(0,1)) = 0.5
 
-        [Header(FlowMap)][Space]
+        [Header(FlowMap_______________________)][Space]
         _FlowMap("FlowMap", 2D) = "white" {}
         _FlowSpeed("向量场速度", Range(0, 10)) = 1
 
-        [Header(Settings)][Space]
+        [Header(Settings_______________________)][Space]
         _TimeSpeed("水流速度", Vector) = (0.03,0.03,0,1)
 
-        [Header(Refract)][Space]
+        [Header(Refract_______________________)][Space]
         _RefractFactor("折射系数", Range(0, 100)) = 1
         [Normal] _NormalMap("NormalMap", 2D) = "bump" {}
         _NormalScale("NormalScale", Range(0, 10)) = 1
 
 
-        [Header(Reflect)][Space]
+        [Header(Reflect_______________________)][Space]
         _SpecularPower("高光指数", Range(0, 256)) = 32
         _SpecularScale("高光强度", Range(0, 100)) = 1
         _AngleDiffusion("视角扩散参数", Range(1, 100)) = 10
@@ -46,7 +46,7 @@ Shader "Water/PhotorealisticWater"
         _ReflectNormalLerp("ReflectNormalLerp", Range(0, 1)) = 0.05
 
 
-        [Header(Tessellation)][Space]
+        [Header(Tessellation_______________________)][Space]
         [KeywordEnum(CUSTOM, VIEW)] _FactorType("Factor Type", Float) = 0
         //CUSTOM:细分因子由_EdgeFactor和_InsideFactor控制
         //VIEW:细分因子由相机距离和_TessFactor控制
@@ -56,7 +56,7 @@ Shader "Water/PhotorealisticWater"
         _TessFadeDist("细分衰减距离", Range(1,1000)) = 5
         _TessMinDist("细分最近距离", Range(0.1, 10)) = 1
         
-        [Header(Option)][Space]
+        [Header(Option_______________________)][Space]
         [Enum(UnityEngine.Rendering.BlendOp)]  _BlendOp  ("BlendOp", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("SrcBlend", Float) = 5
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("DstBlend", Float) = 10
@@ -360,8 +360,6 @@ Shader "Water/PhotorealisticWater"
                 float2 bias = fftNormal.xy * _CameraOpaqueTexture_TexelSize.xy * _RefractFactor;
                 //TODO:改为随深度扰动加强
                 float2 ScreenUVRefract = saturate(ScreenUV + bias);
-
-              
                  
                 
                 //--------------------------------------------
@@ -454,7 +452,7 @@ Shader "Water/PhotorealisticWater"
 
                 //环境反射
                 //CubeMap
-                float3 R = normalize(reflect(-V, ReflectN));
+                float3 R = normalize(reflect(-V, normalize(ReflectN)));
                 float4 cubeMap = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, R);
                 float3 cubeMapcolor = DecodeHDREnvironment(cubeMap, unity_SpecCube0_HDR);
                 //实时环境反射：反射探针
