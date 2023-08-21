@@ -1,7 +1,7 @@
 ﻿Shader "URPPostProcessing/SSR"
 {
     Properties {}
-    
+
     SubShader
     {
         Tags
@@ -18,20 +18,21 @@
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/lighting.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
-        
+
         CBUFFER_START(UnityPerMaterial)
-        
+
         CBUFFER_END
-    
+
         TEXTURE2D_X(_BlitTexture);
         SAMPLER(sampler_BlitTexture);
+
         float4 _BlitTexture_TexelSize;
 
-        float _maxRayMarchingDistance;
-		float _maxRayMarchingStep;
-		float _rayMarchingStepSize;
-		float _depthThickness;
-        
+        float MaxRayMarchingDistance;
+        float MaxRayMarchingStep;
+        float RayMarchingStepSize;
+        float DepthThickness;
+
         struct Attributes
         {
             uint vertexID : SV_VertexID;
@@ -47,7 +48,7 @@
         Pass
         {
             Name "ScreenSpaceReflect"
-            
+
             Tags
             {
                 "LightMode" = "UniversalForward"
@@ -65,33 +66,43 @@
                 return o;
             }
 
-            bool checkDepthCollision(float2 ScreenUV, float3 viewPos, float3 depth)
+            bool checkDepthCollision(float3 viewPos, out float2 screenPos)
             {
-                return ScreenUV.x >= 0 &&
-                    ScreenUV.x <= 1 &&
-                    ScreenUV.y >= 0 &&
-                    ScreenUV.y <= 1 &&
-                    depth < viewPos.z;
-            }
+                float4 clipPos = TransformWViewToHClip(viewPos);
             
-            bool viewSpaceRayMarching(float2 ScreenUV,float3 rayOri, float3 rayDir, float3 depth)
-			{
+                screenPos = GetNormalizedScreenSpaceUV(clipPos);
+                #if UNITY_REVERSED_Z
+                float SceneDepth = SampleSceneDepth(screenPos);
+                #else
+                 float SceneDepth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(uvSS));
+                #endif
+                float linearEyeDepth = LinearEyeDepth(SceneDepth, _ZBufferParams);
+                
+                //判断当前反射点是否在屏幕外，或者超过了当前深度值
+                return screenPos.x > 0 && screenPos.y > 0 && screenPos.x < 1.0 && screenPos.y < 1.0 && linearEyeDepth < -viewPos.z && linearEyeDepth;
+            }
+
+            //BUG:无法得true
+            bool viewSpaceRayMarching(float3 viewPos, float3 reflectDir, out float2 hitScreenPos)
+            {
                 UNITY_LOOP
-				for(int i = 0; i < _maxRayMarchingStep; i++)
-				{
-					float3 currentPos = rayOri + rayDir * _rayMarchingStepSize * i;
-					if (length(rayOri - currentPos) > _maxRayMarchingDistance)
-						return false;
-					if (checkDepthCollision(ScreenUV,currentPos, depth))
-					{
-						return true;
-					}
-				}
-				return false;
-			}
+                for (int i = 0; i < MaxRayMarchingStep; i++)
+                {
+                    float3 currentPos = viewPos + reflectDir * RayMarchingStepSize * i;
+                    if (distance(viewPos,currentPos) > MaxRayMarchingDistance)
+                        return false;
+                    if (checkDepthCollision(currentPos, hitScreenPos))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
 
             float4 frag(Varyings i) : SV_Target
             {
+                float4 blitColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv);
+                
                 float2 ScreenUV = GetNormalizedScreenSpaceUV(i.positionCS);
                 #if UNITY_REVERSED_Z
                 float SceneDepth = SampleSceneDepth(ScreenUV);
@@ -100,22 +111,24 @@
                 #endif
                 float linearEyeDepth = LinearEyeDepth(SceneDepth, _ZBufferParams);
                 float3 SceneNormal = SampleSceneNormals(ScreenUV);
-                float3 rebuildPosWS = ComputeWorldSpacePosition(ScreenUV, SceneDepth, UNITY_MATRIX_I_VP);
                 //重建观察空间坐标
                 float3 viewPos = ComputeViewSpacePosition(ScreenUV, SceneDepth, UNITY_MATRIX_I_P);
-                float3 viewDir = normalize(viewPos);
-                float3 viewNormal = normalize(SceneNormal);
-                float3 reflectDir = reflect(viewDir, viewNormal);
 
-                float2 hitScreenPos = float2(0,0);
-                if(viewSpaceRayMarching(ScreenUV, viewPos, reflectDir, SceneDepth))
+                //计算反射向量
+                float3 viewDir = normalize(viewPos);
+                float3 viewNormal = TransformWorldToViewNormal(SceneNormal, true); //法线转换到观察空间？
+                float3 reflectDir = reflect(-viewDir, viewNormal);
+                float2 hitScreenPos = float2(0, 0);
+                if (viewSpaceRayMarching(viewPos, reflectDir, hitScreenPos))
                 {
+                    float4 reflectColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, hitScreenPos);
                     
+                    blitColor.rgb += reflectColor.rgb;
                 }
-                return float4(reflectDir, 1);
-                float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, i.uv);
+               return float4(blitColor.rgb,1);
                 
-                return color;
+                
+                
             }
             ENDHLSL
         }

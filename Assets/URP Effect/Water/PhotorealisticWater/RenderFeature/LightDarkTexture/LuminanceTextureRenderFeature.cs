@@ -139,7 +139,8 @@ public class LuminanceTextureRenderFeature : ScriptableRendererFeature
     //------------------------------------------------------
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
+        m_renderPass?.Dispose();
+        m_renderPass = null;
         CoreUtils.Destroy(m_blitMaterial);
     }
 }

@@ -119,7 +119,7 @@ public class GaussianBloomRenderPass : ScriptableRenderPass
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor,FilterMode.Bilinear);
         
         
-        Blitter.BlitCameraTexture(cmd,m_cameraRT,m_tempRT0,m_blitMaterial,0);
+        Blitter.BlitCameraTexture(cmd,m_cameraRT,m_tempRT0 , m_blitMaterial,0);
         
         //保存场景原图
         m_blitMaterial.SetTexture(s_SceneColor, m_cameraRT.rt);
@@ -163,4 +163,6 @@ public class GaussianBloomRenderPass : ScriptableRenderPass
     {
         base.OnFinishCameraStackRendering(cmd);
     }
+    
+    
 }

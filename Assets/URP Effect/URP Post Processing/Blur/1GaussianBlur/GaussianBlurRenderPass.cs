@@ -123,6 +123,7 @@ public class GaussianBlurRenderPass : ScriptableRenderPass
         m_tempRT0?.Release();
     }
     
+    
     //------------------------------------------------------
     // 相机堆栈中的所有相机都会调用
     // 释放创建的资源

@@ -21,15 +21,21 @@ public class ScreenSpaceReflectRenderPass : ScriptableRenderPass
     // 变量
     //------------------------------------------------------
     
-    private int m_iterations; //模糊迭代次数
-    private float m_blurRadius;    //模糊范围
-    private int m_downSample;     //降采样
+    float m_maxRayMarchingDistance;
+    float m_maxRayMarchingStep;
+    float m_rayMarchingStepSize;
+    float m_depthThickness;
     
     private Material m_blitMaterial;
     private RTHandle m_cameraColorRT;
     private RTHandle m_tempRT0;
     private RenderTextureDescriptor m_rtDescriptor;
     
+    private static readonly int s_MaxRayMarchingDistance = Shader.PropertyToID("MaxRayMarchingDistance");
+    private static readonly int s_MaxRayMarchingStep = Shader.PropertyToID("MaxRayMarchingStep");
+    private static readonly int s_RayMarchingStepSize = Shader.PropertyToID("RayMarchingStepSize");
+    private static readonly int s_DepthThickness = Shader.PropertyToID("DepthThickness");
+
     //------------------------------------------------------
     // 构造函数
     //------------------------------------------------------
@@ -66,12 +72,13 @@ public class ScreenSpaceReflectRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     // //设置RenderPass参数
     //------------------------------------------------------
-    public void SetRenderPass(RTHandle cameraColorTargetHandle, int iterations, float blurRadius, int downSample)
+    public void SetRenderPass(RTHandle cameraColorTargetHandle,float maxRayMarchingDistance,float maxRayMarchingStep,float rayMarchingStepSize,float depthThickness)
     {
         m_cameraColorRT = cameraColorTargetHandle;
-        m_iterations = iterations;
-        m_blurRadius = blurRadius;
-        m_downSample = downSample;
+        m_maxRayMarchingDistance = maxRayMarchingDistance;
+        m_maxRayMarchingStep = maxRayMarchingStep;
+        m_rayMarchingStepSize = rayMarchingStepSize;
+        m_depthThickness = depthThickness;
     }
     
     //------------------------------------------------------
@@ -119,11 +126,12 @@ public class ScreenSpaceReflectRenderPass : ScriptableRenderPass
             return;
         
         //设置模糊半径
-        m_blitMaterial.SetFloat("_BlurOffset", m_blurRadius);
+        m_blitMaterial.SetFloat(s_MaxRayMarchingDistance, m_maxRayMarchingDistance);
+        m_blitMaterial.SetFloat(s_MaxRayMarchingStep, m_maxRayMarchingStep);
+        m_blitMaterial.SetFloat(s_RayMarchingStepSize, m_rayMarchingStepSize);
+        m_blitMaterial.SetFloat(s_DepthThickness, m_depthThickness);
         
-        //降采样
-        m_rtDescriptor.width /= m_downSample; 
-        m_rtDescriptor.height /= m_downSample;
+        
         
         //获取新的命令缓冲区并为其指定一个名称
         CommandBuffer cmd = CommandBufferPool.Get(m_commandBufferTag);
@@ -151,54 +159,8 @@ public class ScreenSpaceReflectRenderPass : ScriptableRenderPass
     {
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
         Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0, m_blitMaterial, 0);
+        cmd.SetGlobalTexture("_SSRTexture", m_tempRT0.rt);
         Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT);
-        
-        // if (m_tempRT0 != null)
-        // {
-        //     CoreUtils.Destroy(m_tempRT0);
-        //     m_tempRT0 = null;
-        // }
-        //
-        // 单Pass
-        //创建临时RT0
-        // RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        // Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        // for (int i = 0; i < m_iterations; i++)
-        // {
-        //     //创建临时RT1
-        //     RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
-        //     Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //     CoreUtils.Swap(ref m_tempRT0, ref m_tempRT1);
-        //     m_tempRT1?.Release();
-        // }
-        //
-        // //最后 RT0 -> destination
-        // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT);
-        // m_tempRT0?.Release();
-        
-        
-        // //双Pass，乒乓Blit
-        // //创建临时RT0
-        //  RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        //  Blitter.BlitCameraTexture(cmd, m_cameraRT, m_tempRT0);
-        //  for (int i = 0; i < m_iterations; i++)
-        //  {
-        //      //第一轮 RT0 -> RT1
-        //      //创建临时RT1
-        //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT1, m_rtDescriptor, FilterMode.Bilinear);
-        //      Blitter.BlitCameraTexture(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //      m_tempRT0?.Release();
-        //      Blit(cmd, m_tempRT0, m_tempRT1, m_blitMaterial, 0);
-        //      //第二轮 RT1 -> RT0
-        //      //创建临时RT0
-        //      RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor, FilterMode.Bilinear);
-        //      Blitter.BlitCameraTexture(cmd, m_tempRT1, m_tempRT0, m_blitMaterial, 1);
-        //      m_tempRT1?.Release();
-        //  }
-        //
-        //  //最后 RT0 -> destination
-        //  Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraRT, m_blitMaterial, 1);
-        //  m_tempRT0?.Release();
     }
 
     
@@ -208,7 +170,7 @@ public class ScreenSpaceReflectRenderPass : ScriptableRenderPass
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        m_tempRT0?.Release();
+       // m_tempRT0?.Release();
     }
     
     //------------------------------------------------------

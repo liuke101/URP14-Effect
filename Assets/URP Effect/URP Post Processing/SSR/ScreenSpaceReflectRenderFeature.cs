@@ -13,9 +13,10 @@ public class ScreenSpaceReflectRenderFeature : ScriptableRendererFeature
     [System.Serializable]
     public class RenderParameters
     {
-        [Range(0, 10)] public int iterations = 1; //模糊迭代次数
-        [Range(0.0f, 5.0f)] public float blurRadius = 0.0f; //模糊范围
-        [Range(1, 8)] public int downSample = 2; //降采样
+        [Range(0, 1000.0f)] public float maxRayMarchingDistance = 500.0f;
+        [Range(0, 256)] public float maxRayMarchingStep = 64.0f;
+        [Range(0, 2.0f)] public float rayMarchingStepSize = 0.05f;
+        [Range(0, 2.0f)] public float depthThickness = 0.01f;
     }
 
     private ScreenSpaceReflectRenderPass m_renderPass; //RenderPass
@@ -104,8 +105,8 @@ public class ScreenSpaceReflectRenderFeature : ScriptableRendererFeature
         if (renderingData.cameraData.postProcessEnabled && renderingData.cameraData.cameraType == CameraType.Game)
         {
             //设置RenderPass参数
-            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.iterations, parameters.blurRadius,
-                parameters.downSample);
+            m_renderPass.SetRenderPass(renderer.cameraColorTargetHandle, parameters.maxRayMarchingDistance,
+                parameters.maxRayMarchingStep, parameters.rayMarchingStepSize, parameters.depthThickness);
 
             // RenderPass配置输入
             // Color: CopyColor & _CameraOpaqueTexture
@@ -136,5 +137,6 @@ public class ScreenSpaceReflectRenderFeature : ScriptableRendererFeature
     {
         base.Dispose(disposing);
         CoreUtils.Destroy(m_blitMaterial);
+        
     }
 }

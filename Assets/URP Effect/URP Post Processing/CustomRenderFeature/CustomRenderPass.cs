@@ -86,6 +86,7 @@ public class CustomRenderPass : ScriptableRenderPass
         m_rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
         
         m_rtDescriptor.depthBufferBits = 0; //必须声明！Color and depth cannot be combined in RTHandles
+       
     }
     
     //------------------------------------------------------
@@ -96,7 +97,7 @@ public class CustomRenderPass : ScriptableRenderPass
         //相机RT
         ConfigureTarget(m_cameraColorRT);
         //清除颜色
-        //ConfigureClear(ClearFlag.All, Color.clear);
+        ConfigureClear(ClearFlag.None, Color.white);
     }
 
     //------------------------------------------------------
@@ -150,8 +151,8 @@ public class CustomRenderPass : ScriptableRenderPass
     private void Render(CommandBuffer cmd)
     {
         RenderingUtils.ReAllocateIfNeeded(ref m_tempRT0, m_rtDescriptor);
-        Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0, m_blitMaterial, 0);
-        Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT);
+        //Blitter.BlitCameraTexture(cmd, m_cameraColorRT, m_tempRT0, m_blitMaterial, 0);
+        // Blitter.BlitCameraTexture(cmd, m_tempRT0, m_cameraColorRT);
         
         // if (m_tempRT0 != null)
         // {
@@ -201,14 +202,18 @@ public class CustomRenderPass : ScriptableRenderPass
         //  m_tempRT0?.Release();
     }
 
-    
+    //释放资源
+    public void Dispose()
+    {
+        m_tempRT0?.Release();
+    }
     //------------------------------------------------------
     // 渲染后，相机堆栈中的所有相机每帧都会调用
     // 释放创建的资源（如果在多个帧中不需要这些资源）
     //------------------------------------------------------
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        m_tempRT0?.Release();
+       base.OnCameraCleanup(cmd);
     }
     
     //------------------------------------------------------
